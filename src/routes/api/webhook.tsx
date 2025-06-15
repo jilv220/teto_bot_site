@@ -5,7 +5,7 @@ import {
 } from '@tanstack/react-start/server'
 import { Data, Effect } from 'effect'
 import { DatabaseLive, UserService, appConfig } from '../../services'
-import { jsonParseSafe } from '../../utils/http'
+import { bigIntParseSafe, jsonParseSafe } from '../../utils'
 
 export interface WebhookPayload {
   /** If webhook is a bot: ID of the bot that received a vote */
@@ -57,13 +57,11 @@ export const ServerRoute = createServerFileRoute('/api/webhook').methods({
       jsonParseSafe(body).pipe(
         Effect.flatMap((vote: WebhookPayload) =>
           Effect.gen(function* () {
-            const userId = Number.parseInt(vote.user, 10)
-
-            if (Number.isNaN(userId) || userId <= 0) {
-              return yield* Effect.fail(
-                new InvalidUserIdError({ userId: vote.user })
+            const userId = yield* bigIntParseSafe(vote.user).pipe(
+              Effect.mapError(
+                () => new InvalidUserIdError({ userId: vote.user })
               )
-            }
+            )
 
             if (vote.type === 'test') {
               console.log(`Received a test vote from user: ${userId}`)

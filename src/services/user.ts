@@ -13,7 +13,7 @@ export const UserService = {
    * Gets a user by user_id, creating one if it doesn't exist.
    * This is the TypeScript equivalent of the Elixir get_or_create_user function.
    */
-  getOrCreateUser: (userId: number) =>
+  getOrCreateUser: (userId: bigint) =>
     Effect.gen(function* () {
       const existingUser = yield* UserRepository.findById(userId)
       if (existingUser) return existingUser
@@ -35,7 +35,7 @@ export const UserService = {
   /**
    * Business logic: Award vote bonus credits to user
    */
-  awardVoteBonus: (userId: number, bonusAmount: number) =>
+  awardVoteBonus: (userId: bigint, bonusAmount: number) =>
     Effect.gen(function* () {
       const user = yield* UserRepository.findById(userId)
 
@@ -46,7 +46,7 @@ export const UserService = {
       }
 
       const updatedUser = yield* UserRepository.update(userId, {
-        messageCredits: user.messageCredits + bonusAmount,
+        messageCredits: user.messageCredits + BigInt(bonusAmount),
         lastVotedAt: new Date().toISOString(),
       })
 
@@ -57,7 +57,7 @@ export const UserService = {
    * Simple delegations to repository (you could expose these directly)
    */
   getUser: UserRepository.findById,
-  createUser: (userId: number) =>
+  createUser: (userId: bigint) =>
     Effect.gen(function* () {
       const now = new Date().toISOString()
       const userData: NewUser = {

@@ -12,7 +12,7 @@ export class UserRepositoryError extends DatabaseError {}
  * Similar to Elixir's Repo module
  */
 export const UserRepository = {
-  findById: (userId: number) =>
+  findById: (userId: bigint) =>
     Effect.gen(function* () {
       const db = yield* Database
 
@@ -53,7 +53,7 @@ export const UserRepository = {
       return createdUser
     }),
 
-  update: (userId: number, updates: Partial<User>) =>
+  update: (userId: bigint, updates: Partial<User>) =>
     Effect.gen(function* () {
       const db = yield* Database
 
@@ -74,7 +74,7 @@ export const UserRepository = {
       return updatedUser
     }),
 
-  delete: (userId: number) =>
+  delete: (userId: bigint) =>
     Effect.gen(function* () {
       const db = yield* Database
 

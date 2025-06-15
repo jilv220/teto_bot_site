@@ -118,15 +118,15 @@ export const channels = pgTable(
 export const users = pgTable(
   'users',
   {
-    // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    userId: bigint('user_id', { mode: 'number' }).primaryKey().notNull(),
+    // Using { mode: "bigint" } because Discord user IDs can exceed JS number limitations
+    userId: bigint('user_id', { mode: 'bigint' }).primaryKey().notNull(),
     insertedAt: timestamp('inserted_at', { mode: 'string' }).notNull(),
     updatedAt: timestamp('updated_at', { mode: 'string' }).notNull(),
     role: text().default('user'),
     lastVotedAt: timestamp('last_voted_at', { mode: 'string' }),
-    // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    messageCredits: bigint('message_credits', { mode: 'number' })
-      .default(30)
+    // Using { mode: "bigint" } because credits can be large numbers
+    messageCredits: bigint('message_credits', { mode: 'bigint' })
+      .default(BigInt(30))
       .notNull(),
   },
   (table) => [
@@ -142,8 +142,8 @@ export const users = pgTable(
 )
 
 export const guilds = pgTable('guilds', {
-  // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-  guildId: bigint('guild_id', { mode: 'number' }).notNull(),
+  // Using { mode: "bigint" } because Discord guild IDs can exceed JS number limitations
+  guildId: bigint('guild_id', { mode: 'bigint' }).notNull(),
   insertedAt: timestamp('inserted_at', { mode: 'string' }).notNull(),
   updatedAt: timestamp('updated_at', { mode: 'string' }).notNull(),
   id: uuid().defaultRandom().primaryKey().notNull(),
@@ -152,18 +152,18 @@ export const guilds = pgTable('guilds', {
 export const userGuilds = pgTable(
   'user_guilds',
   {
-    // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    userId: bigint('user_id', { mode: 'number' }).notNull(),
-    // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    guildId: bigint('guild_id', { mode: 'number' }).notNull(),
+    // Using { mode: "bigint" } because Discord user IDs can exceed JS number limitations
+    userId: bigint('user_id', { mode: 'bigint' }).notNull(),
+    // Using { mode: "bigint" } because Discord guild IDs can exceed JS number limitations
+    guildId: bigint('guild_id', { mode: 'bigint' }).notNull(),
     insertedAt: timestamp('inserted_at', { mode: 'string' }).notNull(),
     updatedAt: timestamp('updated_at', { mode: 'string' }).notNull(),
     intimacy: integer().default(0).notNull(),
     lastMessageAt: timestamp('last_message_at', { mode: 'string' }),
     lastFeed: timestamp('last_feed', { mode: 'string' }),
-    // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    dailyMessageCount: bigint('daily_message_count', { mode: 'number' })
-      .default(0)
+    // Using { mode: "bigint" } because message counts can be large numbers
+    dailyMessageCount: bigint('daily_message_count', { mode: 'bigint' })
+      .default(BigInt(0))
       .notNull(),
   },
   (table) => [
