@@ -3,7 +3,7 @@ import {
   getEvent,
   getHeaders,
 } from '@tanstack/react-start/server'
-import { Data, Effect } from 'effect'
+import { Data, Effect, Schedule } from 'effect'
 import { DatabaseLive, UserService, appConfig } from '../../services'
 import { bigIntParseSafe, jsonParseSafe } from '../../utils'
 
@@ -75,6 +75,10 @@ export const ServerRoute = createServerFileRoute('/api/webhook').methods({
             return user.userId
           })
         ),
+        Effect.retry({
+          schedule: Schedule.exponential(100).pipe(Schedule.jittered),
+          times: 3,
+        }),
         Effect.provide(DatabaseLive),
         Effect.match({
           onFailure: (error) => ({ success: false as const, error }),

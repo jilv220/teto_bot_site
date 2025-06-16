@@ -13,6 +13,7 @@ import { createServerRootRoute } from '@tanstack/react-start/server'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { ServerRoute as ApiWebhookServerRouteImport } from './routes/api/webhook'
+import { ServerRoute as ApiTokensServerRouteImport } from './routes/api/tokens'
 
 const rootServerRouteImport = createServerRootRoute()
 
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const ApiWebhookServerRoute = ApiWebhookServerRouteImport.update({
   id: '/api/webhook',
   path: '/api/webhook',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
+const ApiTokensServerRoute = ApiTokensServerRouteImport.update({
+  id: '/api/tokens',
+  path: '/api/tokens',
   getParentRoute: () => rootServerRouteImport,
 } as any)
 
@@ -49,24 +55,28 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
 }
 export interface FileServerRoutesByFullPath {
+  '/api/tokens': typeof ApiTokensServerRoute
   '/api/webhook': typeof ApiWebhookServerRoute
 }
 export interface FileServerRoutesByTo {
+  '/api/tokens': typeof ApiTokensServerRoute
   '/api/webhook': typeof ApiWebhookServerRoute
 }
 export interface FileServerRoutesById {
   __root__: typeof rootServerRouteImport
+  '/api/tokens': typeof ApiTokensServerRoute
   '/api/webhook': typeof ApiWebhookServerRoute
 }
 export interface FileServerRouteTypes {
   fileServerRoutesByFullPath: FileServerRoutesByFullPath
-  fullPaths: '/api/webhook'
+  fullPaths: '/api/tokens' | '/api/webhook'
   fileServerRoutesByTo: FileServerRoutesByTo
-  to: '/api/webhook'
-  id: '__root__' | '/api/webhook'
+  to: '/api/tokens' | '/api/webhook'
+  id: '__root__' | '/api/tokens' | '/api/webhook'
   fileServerRoutesById: FileServerRoutesById
 }
 export interface RootServerRouteChildren {
+  ApiTokensServerRoute: typeof ApiTokensServerRoute
   ApiWebhookServerRoute: typeof ApiWebhookServerRoute
 }
 
@@ -90,6 +100,13 @@ declare module '@tanstack/react-start/server' {
       preLoaderRoute: typeof ApiWebhookServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
+    '/api/tokens': {
+      id: '/api/tokens'
+      path: '/api/tokens'
+      fullPath: '/api/tokens'
+      preLoaderRoute: typeof ApiTokensServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
   }
 }
 
@@ -100,6 +117,7 @@ export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 const rootServerRouteChildren: RootServerRouteChildren = {
+  ApiTokensServerRoute: ApiTokensServerRoute,
   ApiWebhookServerRoute: ApiWebhookServerRoute,
 }
 export const serverRouteTree = rootServerRouteImport
