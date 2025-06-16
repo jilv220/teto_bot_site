@@ -12,31 +12,40 @@ export const ServerRoute = createServerFileRoute('/api/tokens').methods({
   POST: async ({ request }) => {
     const body = await request.text()
 
-    const program = jsonParseSafe(body).pipe(
-      Effect.flatMap((parsed: unknown) => {
-        const decode = Schema.decodeUnknownEither(BodySchema)
-        return decode(parsed)
-      }),
-      Effect.flatMap(({ text }) => {
-        const enc = get_encoding('cl100k_base')
-        const tokens = enc.encode(text)
-        const nTokens = tokens.length
+    const program = Effect.gen(function* () {
+      const parsed = yield* jsonParseSafe(body)
+      const { text } = yield* Schema.decodeUnknown(BodySchema)(parsed)
+
+      const enc = get_encoding('cl100k_base')
+      const tokens = enc.encode(text)
+      const nTokens = tokens.length
+      enc.free()
+
+      return json({
+        token_count: nTokens,
+        text_length: text.length,
+      })
+    }).pipe(
+      Effect.catchAll((error) => {
+        if (error._tag === 'JsonParseError') {
+          return Effect.succeed(
+            json({ error: 'Invalid JSON in request body' }, { status: 400 })
+          )
+        }
+
+        if (error._tag === 'ParseError') {
+          return Effect.succeed(
+            json(
+              {
+                error: 'Invalid request body: missing or invalid "text" field',
+              },
+              { status: 400 }
+            )
+          )
+        }
 
         return Effect.succeed(
-          json({
-            token_count: nTokens,
-            text_length: text.length,
-          })
-        )
-      }),
-      Effect.mapError((_e) => {
-        return Effect.succeed(
-          json(
-            {
-              error: 'Invalid Body',
-            },
-            { status: 400 }
-          )
+          json({ error: 'Internal server error' }, { status: 500 })
         )
       })
     )
