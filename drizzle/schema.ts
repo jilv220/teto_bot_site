@@ -63,8 +63,8 @@ export const users = pgTable(
     role: text().default('user'),
     lastVotedAt: timestamp('last_voted_at', { mode: 'string' }),
     // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    messageCredits: bigint('message_credits', { mode: 'bigint' })
-      .default(BigInt(30))
+    messageCredits: bigint('message_credits', { mode: 'number' })
+      .default(30)
       .notNull(),
   },
   (table) => [
@@ -100,8 +100,8 @@ export const userGuilds = pgTable(
     lastMessageAt: timestamp('last_message_at', { mode: 'string' }),
     lastFeed: timestamp('last_feed', { mode: 'string' }),
     // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    dailyMessageCount: bigint('daily_message_count', { mode: 'bigint' })
-      .default(BigInt(0))
+    dailyMessageCount: bigint('daily_message_count', { mode: 'number' })
+      .default(0)
       .notNull(),
   },
   (table) => [
