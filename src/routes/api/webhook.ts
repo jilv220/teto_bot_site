@@ -4,7 +4,7 @@ import {
   getEvent,
   getHeaders,
 } from '@tanstack/react-start/server'
-import { Data, Duration, Effect, Schedule } from 'effect'
+import { Data, Duration, Effect, Logger, Schedule } from 'effect'
 import { UserService, UserServiceLive, appConfig } from '../../services'
 import { bigIntParseSafe, jsonParseSafe } from '../../utils'
 
@@ -65,12 +65,18 @@ export const ServerRoute = createServerFileRoute('/api/webhook').methods({
       )
 
       if (vote.type === 'test') {
-        console.log(`Received a test vote from user: ${userId}`)
+        yield* Effect.logInfo(`Received a test vote from user: ${userId}`)
         return new Response(null, { status: 204 })
       }
 
       const userService = yield* UserService
-      yield* userService.awardVoteBonus(userId, voteCreditBonus)
+      const { messageCredits } = yield* userService.awardVoteBonus(
+        userId,
+        voteCreditBonus
+      )
+      yield* Effect.logInfo(
+        `Awarded ${voteCreditBonus} credits to user: ${userId}. New balance: ${messageCredits}`
+      )
 
       return new Response(null, { status: 204 })
     }).pipe(
@@ -81,6 +87,8 @@ export const ServerRoute = createServerFileRoute('/api/webhook').methods({
         times: 3,
       }),
       Effect.provide(UserServiceLive),
+      Effect.provide(Logger.pretty),
+      Effect.tapError((error) => Effect.logError('Webhook error:', error)),
       Effect.catchAll((error) => {
         if (
           error._tag === 'JsonParseError' ||
@@ -96,7 +104,6 @@ export const ServerRoute = createServerFileRoute('/api/webhook').methods({
           )
         }
 
-        console.error('Failed to process webhook:', error)
         return Effect.succeed(
           json(
             {

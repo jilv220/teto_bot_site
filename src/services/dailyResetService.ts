@@ -25,10 +25,11 @@ const make = Effect.gen(function* () {
   const db = yield* Database
   const userRepository = yield* UserRepository
   const userGuildRepository = yield* UserGuildRepository
+
   const config = yield* appConfig
 
   const refillAllCredits = Effect.gen(function* () {
-    yield* Console.log(
+    yield* Effect.logInfo(
       'DailyResetService: Refilling message credits for users below the daily cap'
     )
 
@@ -44,7 +45,7 @@ const make = Effect.gen(function* () {
         }),
     })
 
-    yield* Console.log(
+    yield* Effect.logInfo(
       `Found ${usersNeedingRefill.length} users needing credit refill`
     )
 
@@ -75,7 +76,7 @@ const make = Effect.gen(function* () {
   })
 
   const resetAllDailyMetrics = Effect.gen(function* () {
-    yield* Console.log(
+    yield* Effect.logInfo(
       'DailyResetService: Resetting daily message counts and feed cooldowns'
     )
 
@@ -83,7 +84,7 @@ const make = Effect.gen(function* () {
     const userGuildsNeedingReset =
       yield* userGuildRepository.findAllWithResetNeeded()
 
-    yield* Console.log(
+    yield* Effect.logInfo(
       `Found ${userGuildsNeedingReset.length} user guilds needing daily metrics reset`
     )
 
@@ -117,7 +118,7 @@ const make = Effect.gen(function* () {
   return DailyResetService.of({
     performDailyReset: () =>
       Effect.gen(function* () {
-        yield* Console.log(
+        yield* Effect.logInfo(
           'DailyResetService: Starting daily credit refill and metric reset'
         )
 
@@ -129,7 +130,7 @@ const make = Effect.gen(function* () {
         const endTime = Date.now()
         const duration = endTime - startTime
 
-        yield* Console.log(
+        yield* Effect.logInfo(
           `DailyResetService: Successfully refilled ${creditCount} users and reset ${resetCount} daily metrics in ${duration}ms`
         )
 
