@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm'
-import { Effect } from 'effect'
+import { Context, Effect, Layer } from 'effect'
 import { users } from '../db'
 import { Database, DatabaseError } from '../services/database'
 
@@ -11,12 +11,27 @@ export class UserRepositoryError extends DatabaseError {}
  * Pure data access layer - only CRUD operations
  * Similar to Elixir's Repo module
  */
-export const UserRepository = {
-  findById: (userId: bigint) =>
-    Effect.gen(function* () {
-      const db = yield* Database
+export class UserRepository extends Context.Tag('UserRepository')<
+  UserRepository,
+  {
+    findById: (
+      userId: bigint
+    ) => Effect.Effect<User | null, UserRepositoryError>
+    create: (userData: NewUser) => Effect.Effect<User, UserRepositoryError>
+    update: (
+      userId: bigint,
+      updates: Partial<User>
+    ) => Effect.Effect<User, UserRepositoryError>
+    delete: (userId: bigint) => Effect.Effect<void, UserRepositoryError>
+  }
+>() {}
 
-      const user = yield* Effect.tryPromise({
+const make = Effect.gen(function* () {
+  const db = yield* Database
+
+  return UserRepository.of({
+    findById: (userId: bigint) =>
+      Effect.tryPromise({
         try: () =>
           db
             .select()
@@ -28,16 +43,10 @@ export const UserRepository = {
           new UserRepositoryError({
             message: `Failed to find user ${userId}: ${error}`,
           }),
-      })
+      }),
 
-      return user
-    }),
-
-  create: (userData: NewUser) =>
-    Effect.gen(function* () {
-      const db = yield* Database
-
-      const createdUser = yield* Effect.tryPromise({
+    create: (userData: NewUser) =>
+      Effect.tryPromise({
         try: () =>
           db
             .insert(users)
@@ -48,16 +57,10 @@ export const UserRepository = {
           new UserRepositoryError({
             message: `Failed to create user: ${error}`,
           }),
-      })
+      }),
 
-      return createdUser
-    }),
-
-  update: (userId: bigint, updates: Partial<User>) =>
-    Effect.gen(function* () {
-      const db = yield* Database
-
-      const updatedUser = yield* Effect.tryPromise({
+    update: (userId: bigint, updates: Partial<User>) =>
+      Effect.tryPromise({
         try: () =>
           db
             .update(users)
@@ -69,21 +72,17 @@ export const UserRepository = {
           new UserRepositoryError({
             message: `Failed to update user ${userId}: ${error}`,
           }),
-      })
+      }),
 
-      return updatedUser
-    }),
-
-  delete: (userId: bigint) =>
-    Effect.gen(function* () {
-      const db = yield* Database
-
-      yield* Effect.tryPromise({
+    delete: (userId: bigint) =>
+      Effect.tryPromise({
         try: () => db.delete(users).where(eq(users.userId, userId)),
         catch: (error) =>
           new UserRepositoryError({
             message: `Failed to delete user ${userId}: ${error}`,
           }),
-      })
-    }),
-}
+      }),
+  })
+})
+
+export const UserRepositoryLive = Layer.effect(UserRepository, make)

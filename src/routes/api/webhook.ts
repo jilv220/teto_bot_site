@@ -1,10 +1,11 @@
+import { json } from '@tanstack/react-start'
 import {
   createServerFileRoute,
   getEvent,
   getHeaders,
 } from '@tanstack/react-start/server'
-import { Data, Effect, Schedule } from 'effect'
-import { DatabaseLive, UserService, appConfig } from '../../services'
+import { Data, Duration, Effect, Schedule } from 'effect'
+import { UserService, UserServiceLive, appConfig } from '../../services'
 import { bigIntParseSafe, jsonParseSafe } from '../../utils'
 
 export interface WebhookPayload {
@@ -44,75 +45,69 @@ export const ServerRoute = createServerFileRoute('/api/webhook').methods({
     const { topggWebAuthToken, voteCreditBonus } = Effect.runSync(appConfig)
 
     if (!authorization || authorization !== topggWebAuthToken)
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 403,
-        headers: {
-          'Content-Type': 'application/json',
+      return json(
+        {
+          error: 'Unauthorized',
         },
-      })
+        {
+          status: 403,
+        }
+      )
 
     const body = await request.text()
 
-    const result = await Effect.runPromise(
-      jsonParseSafe(body).pipe(
-        Effect.flatMap((vote: WebhookPayload) =>
-          Effect.gen(function* () {
-            const userId = yield* bigIntParseSafe(vote.user).pipe(
-              Effect.mapError(
-                () => new InvalidUserIdError({ userId: vote.user })
-              )
-            )
+    const program = Effect.gen(function* () {
+      const parsedBody = yield* jsonParseSafe(body)
+      const vote = parsedBody as WebhookPayload
 
-            if (vote.type === 'test') {
-              console.log(`Received a test vote from user: ${userId}`)
-              return userId
-            }
-
-            const user = yield* UserService.awardVoteBonus(
-              userId,
-              voteCreditBonus
-            )
-            return user.userId
-          })
-        ),
-        Effect.retry({
-          schedule: Schedule.exponential(100).pipe(Schedule.jittered),
-          times: 3,
-        }),
-        Effect.provide(DatabaseLive),
-        Effect.match({
-          onFailure: (error) => ({ success: false as const, error }),
-          onSuccess: (value) => ({ success: true as const, value }),
-        })
+      const userId = yield* bigIntParseSafe(vote.user).pipe(
+        Effect.mapError(() => new InvalidUserIdError({ userId: vote.user }))
       )
-    )
 
-    if (!result.success) {
-      console.error('Failed to process webhook:', result.error)
-
-      if (
-        result.error._tag === 'JsonParseError' ||
-        result.error._tag === 'InvalidUserIdError'
-      ) {
-        return new Response(JSON.stringify({ error: 'Invalid Body' }), {
-          status: 400,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
+      if (vote.type === 'test') {
+        console.log(`Received a test vote from user: ${userId}`)
+        return new Response(null, { status: 204 })
       }
 
-      // Other errors (database, etc.)
-      return new Response(JSON.stringify({ error: 'Failed to process vote' }), {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-    }
+      const userService = yield* UserService
+      yield* userService.awardVoteBonus(userId, voteCreditBonus)
 
-    return new Response(null, {
-      status: 204,
-    })
+      return new Response(null, { status: 204 })
+    }).pipe(
+      Effect.retry({
+        schedule: Schedule.exponential(Duration.millis(100)).pipe(
+          Schedule.jittered
+        ),
+        times: 3,
+      }),
+      Effect.provide(UserServiceLive),
+      Effect.catchAll((error) => {
+        if (
+          error._tag === 'JsonParseError' ||
+          error._tag === 'InvalidUserIdError'
+        ) {
+          return Effect.succeed(
+            json(
+              {
+                error: 'Invalid Body',
+              },
+              { status: 400 }
+            )
+          )
+        }
+
+        console.error('Failed to process webhook:', error)
+        return Effect.succeed(
+          json(
+            {
+              error: 'Failed to process vote',
+            },
+            { status: 500 }
+          )
+        )
+      })
+    )
+
+    return await Effect.runPromise(program)
   },
 })
