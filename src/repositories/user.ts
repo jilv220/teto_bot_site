@@ -7,10 +7,6 @@ export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 export class UserRepositoryError extends DatabaseError {}
 
-/**
- * Pure data access layer - only CRUD operations
- * Similar to Elixir's Repo module
- */
 export class UserRepository extends Context.Tag('UserRepository')<
   UserRepository,
   {

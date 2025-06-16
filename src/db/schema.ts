@@ -93,12 +93,12 @@ export const obanJobs = pgTable(
 export const channels = pgTable(
   'channels',
   {
-    // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    channelId: bigint('channel_id', { mode: 'number' }).notNull(),
+    // Using { mode: "bigint" } because Discord channel IDs can exceed JS number limitations
+    channelId: bigint('channel_id', { mode: 'bigint' }).notNull(),
     insertedAt: timestamp('inserted_at', { mode: 'string' }).notNull(),
     updatedAt: timestamp('updated_at', { mode: 'string' }).notNull(),
-    // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    guildId: bigint('guild_id', { mode: 'number' }).notNull(),
+    // Using { mode: "bigint" } because Discord guild IDs can exceed JS number limitations
+    guildId: bigint('guild_id', { mode: 'bigint' }).notNull(),
     id: uuid().defaultRandom().primaryKey().notNull(),
   },
   (table) => [
