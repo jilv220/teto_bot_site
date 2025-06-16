@@ -162,8 +162,9 @@ const monitorQueueStatus = (queue: Queue.Queue) =>
       }
     })
 
+    const reportOnceEvery = 60 * 60 * 2
     yield* getQueueStatus.pipe(
-      Effect.repeat(Schedule.fixed(Duration.seconds(30))),
+      Effect.repeat(Schedule.fixed(Duration.seconds(reportOnceEvery))),
       Effect.fork
     )
   })
