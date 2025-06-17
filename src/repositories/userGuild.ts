@@ -2,9 +2,11 @@ import { and, eq, gt, isNotNull, or } from 'drizzle-orm'
 import { Context, Effect, Layer } from 'effect'
 import { userGuilds } from '../db'
 import { Database, DatabaseError } from '../services/database'
+import type { SerializeBigInt } from '../utils/bigint'
 
 export type UserGuild = typeof userGuilds.$inferSelect
 export type NewUserGuild = typeof userGuilds.$inferInsert
+export type SerializedUserGuild = SerializeBigInt<UserGuild>
 export class UserGuildRepositoryError extends DatabaseError {}
 
 export class UserGuildRepository extends Context.Tag('UserGuildRepository')<
@@ -18,6 +20,7 @@ export class UserGuildRepository extends Context.Tag('UserGuildRepository')<
       UserGuild[],
       UserGuildRepositoryError
     >
+    findAll: () => Effect.Effect<UserGuild[], UserGuildRepositoryError>
     create: (
       userGuildData: NewUserGuild
     ) => Effect.Effect<UserGuild, UserGuildRepositoryError>
@@ -72,6 +75,15 @@ const make = Effect.gen(function* () {
         catch: (error) =>
           new UserGuildRepositoryError({
             message: `Failed to find user guilds needing reset: ${error}`,
+          }),
+      }),
+
+    findAll: () =>
+      Effect.tryPromise({
+        try: () => db.select().from(userGuilds),
+        catch: (error) =>
+          new UserGuildRepositoryError({
+            message: `Failed to find all user guilds: ${error}`,
           }),
       }),
 

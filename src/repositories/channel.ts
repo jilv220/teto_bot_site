@@ -2,9 +2,11 @@ import { eq } from 'drizzle-orm'
 import { Context, Effect, Layer } from 'effect'
 import { channels } from '../db'
 import { Database, DatabaseError } from '../services/database'
+import type { SerializeBigInt } from '../utils/bigint'
 
 export type Channel = typeof channels.$inferSelect
 export type NewChannel = typeof channels.$inferInsert
+export type SerializedChannel = SerializeBigInt<Channel>
 export class ChannelRepositoryError extends DatabaseError {}
 
 export class ChannelRepository extends Context.Tag('ChannelRepository')<
@@ -16,6 +18,7 @@ export class ChannelRepository extends Context.Tag('ChannelRepository')<
     findByGuildId: (
       guildId: bigint
     ) => Effect.Effect<Channel[], ChannelRepositoryError>
+    findAll: () => Effect.Effect<Channel[], ChannelRepositoryError>
     create: (
       channelData: NewChannel
     ) => Effect.Effect<Channel, ChannelRepositoryError>
@@ -53,6 +56,15 @@ const make = Effect.gen(function* () {
         catch: (error) =>
           new ChannelRepositoryError({
             message: `Failed to find channels for guild ${guildId}: ${error}`,
+          }),
+      }),
+
+    findAll: () =>
+      Effect.tryPromise({
+        try: () => db.select().from(channels),
+        catch: (error) =>
+          new ChannelRepositoryError({
+            message: `Failed to find all channels: ${error}`,
           }),
       }),
 

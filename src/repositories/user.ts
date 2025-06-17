@@ -2,9 +2,11 @@ import { eq } from 'drizzle-orm'
 import { Context, Effect, Layer } from 'effect'
 import { users } from '../db'
 import { Database, DatabaseError } from '../services/database'
+import type { SerializeBigInt } from '../utils/bigint'
 
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
+export type SerializedUser = SerializeBigInt<User>
 export class UserRepositoryError extends DatabaseError {}
 
 export class UserRepository extends Context.Tag('UserRepository')<
@@ -13,6 +15,7 @@ export class UserRepository extends Context.Tag('UserRepository')<
     findById: (
       userId: bigint
     ) => Effect.Effect<User | null, UserRepositoryError>
+    findAll: () => Effect.Effect<User[], UserRepositoryError>
     create: (userData: NewUser) => Effect.Effect<User, UserRepositoryError>
     update: (
       userId: bigint,
@@ -38,6 +41,15 @@ const make = Effect.gen(function* () {
         catch: (error) =>
           new UserRepositoryError({
             message: `Failed to find user ${userId}: ${error}`,
+          }),
+      }),
+
+    findAll: () =>
+      Effect.tryPromise({
+        try: () => db.select().from(users),
+        catch: (error) =>
+          new UserRepositoryError({
+            message: `Failed to find all users: ${error}`,
           }),
       }),
 

@@ -2,9 +2,11 @@ import { eq } from 'drizzle-orm'
 import { Context, Effect, Layer } from 'effect'
 import { guilds } from '../db'
 import { Database, DatabaseError } from '../services/database'
+import type { SerializeBigInt } from '../utils/bigint'
 
 export type Guild = typeof guilds.$inferSelect
 export type NewGuild = typeof guilds.$inferInsert
+export type SerializedGuild = SerializeBigInt<Guild>
 export class GuildRepositoryError extends DatabaseError {}
 
 export class GuildRepository extends Context.Tag('GuildRepository')<
@@ -16,6 +18,7 @@ export class GuildRepository extends Context.Tag('GuildRepository')<
     findByUuid: (
       id: string
     ) => Effect.Effect<Guild | null, GuildRepositoryError>
+    findAll: () => Effect.Effect<Guild[], GuildRepositoryError>
     create: (guildData: NewGuild) => Effect.Effect<Guild, GuildRepositoryError>
     update: (
       guildId: bigint,
@@ -56,6 +59,15 @@ const make = Effect.gen(function* () {
         catch: (error) =>
           new GuildRepositoryError({
             message: `Failed to find guild with UUID ${id}: ${error}`,
+          }),
+      }),
+
+    findAll: () =>
+      Effect.tryPromise({
+        try: () => db.select().from(guilds),
+        catch: (error) =>
+          new GuildRepositoryError({
+            message: `Failed to find all guilds: ${error}`,
           }),
       }),
 
