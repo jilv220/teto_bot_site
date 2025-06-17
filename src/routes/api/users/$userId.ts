@@ -13,7 +13,6 @@ const UpdateUserSchema = Schema.Struct({
 })
 
 export const ServerRoute = createServerFileRoute('/api/users/$userId').methods({
-  // Get user by ID
   GET: async ({ params }) => {
     const program = Effect.gen(function* () {
       const userRepo = yield* UserRepository

@@ -1,193 +1,285 @@
-import { json } from '@tanstack/react-start'
+import { createServerFn, json } from '@tanstack/react-start'
 import { createServerFileRoute } from '@tanstack/react-start/server'
-import { Effect, Schema } from 'effect'
+import { Effect } from 'effect'
+import { z } from 'zod/v4'
 import { authorizationMiddleware } from '../../middlewares/authorization'
 import {
   type NewUserGuild,
+  type SerializedUserGuild,
   type UserGuild,
   UserGuildRepository,
 } from '../../repositories/userGuild'
 import { AllRepositoriesLive } from '../../services/repositories'
-import { jsonParseSafe } from '../../utils'
+import {
+  buildInvalidBodyErrorResponse,
+  buildValidationErrorResponse,
+} from '../../utils'
 import { serializeBigInt } from '../../utils/bigint'
 
-const CreateUserGuildSchema = Schema.Struct({
-  userId: Schema.String,
-  guildId: Schema.String,
-  intimacy: Schema.optional(Schema.Number),
+const CreateUserGuildSchema = z.object({
+  userId: z.coerce.bigint(),
+  guildId: z.coerce.bigint(),
+  intimacy: z.number().optional(),
 })
 
-const UpdateUserGuildSchema = Schema.Struct({
-  intimacy: Schema.optional(Schema.Number),
-  lastMessageAt: Schema.optional(Schema.String),
-  lastFeed: Schema.optional(Schema.String),
-  dailyMessageCount: Schema.optional(Schema.String),
+const UpdateUserGuildSchema = z.object({
+  intimacy: z.number().optional(),
+  lastMessageAt: z.iso.datetime().optional(),
+  lastFeed: z.iso.datetime().optional(),
+  dailyMessageCount: z.coerce.bigint().optional(),
 })
+
+const GetUserGuildSchema = z.object({
+  userId: z.coerce.bigint(),
+  guildId: z.coerce.bigint(),
+})
+
+const UpdateUserGuildParamsSchema = z.object({
+  userId: z.coerce.bigint(),
+  guildId: z.coerce.bigint(),
+  updateData: UpdateUserGuildSchema,
+})
+
+export const getUserGuilds = createServerFn().handler(async () => {
+  const program = Effect.gen(function* () {
+    const userGuildRepo = yield* UserGuildRepository
+    const userGuilds = yield* userGuildRepo.findAll()
+    const serializedUserGuilds: SerializedUserGuild[] =
+      serializeBigInt(userGuilds)
+
+    return {
+      data: {
+        userGuilds: serializedUserGuilds,
+      },
+    }
+  }).pipe(
+    Effect.catchAll(() =>
+      Effect.succeed({
+        error: {
+          code: 500,
+          message: 'Failed to fetch user-guild relationships',
+        },
+      })
+    ),
+    Effect.provide(AllRepositoriesLive)
+  )
+
+  return await Effect.runPromise(program)
+})
+
+export const getUserGuild = createServerFn({ method: 'GET' })
+  .validator((data: unknown) => {
+    return GetUserGuildSchema.parse(data)
+  })
+  .handler(async ({ data: params }) => {
+    const program = Effect.gen(function* () {
+      const userGuildRepo = yield* UserGuildRepository
+      const userGuild = yield* userGuildRepo.findByUserAndGuild(
+        params.userId,
+        params.guildId
+      )
+
+      if (!userGuild) {
+        return {
+          error: {
+            code: 404,
+            message: 'User-guild relationship not found',
+          },
+        }
+      }
+
+      const serializedUserGuild: SerializedUserGuild =
+        serializeBigInt(userGuild)
+
+      return {
+        data: {
+          userGuild: serializedUserGuild,
+        },
+      }
+    }).pipe(
+      Effect.catchAll(() =>
+        Effect.succeed({
+          error: {
+            code: 500,
+            message: 'Failed to fetch user-guild relationship',
+          },
+        })
+      ),
+      Effect.provide(AllRepositoriesLive)
+    )
+
+    return await Effect.runPromise(program)
+  })
+
+export const createUserGuild = createServerFn({ method: 'POST' })
+  .validator((data: unknown) => {
+    return CreateUserGuildSchema.parse(data)
+  })
+  .handler(async ({ data: userGuildData }) => {
+    const program = Effect.gen(function* () {
+      const userGuildRepo = yield* UserGuildRepository
+
+      const newUserGuild: NewUserGuild = {
+        userId: userGuildData.userId,
+        guildId: userGuildData.guildId,
+        intimacy: userGuildData.intimacy || 0,
+        insertedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+
+      const userGuild = yield* userGuildRepo.create(newUserGuild)
+      const serializedUserGuild: SerializedUserGuild =
+        serializeBigInt(userGuild)
+      return {
+        data: {
+          userGuild: serializedUserGuild,
+        },
+      }
+    }).pipe(
+      Effect.catchAll(() => {
+        return Effect.succeed({
+          error: {
+            code: 500,
+            message: 'Failed to create user-guild relationship',
+          },
+        })
+      }),
+      Effect.provide(AllRepositoriesLive)
+    )
+
+    return await Effect.runPromise(program)
+  })
+
+export const updateUserGuild = createServerFn({ method: 'POST' })
+  .validator((data: unknown) => {
+    return UpdateUserGuildParamsSchema.parse(data)
+  })
+  .handler(async ({ data: params }) => {
+    const program = Effect.gen(function* () {
+      const userGuildRepo = yield* UserGuildRepository
+
+      const updates: Partial<UserGuild> = {}
+      if (params.updateData.intimacy !== undefined) {
+        updates.intimacy = params.updateData.intimacy
+      }
+      if (params.updateData.lastMessageAt !== undefined) {
+        updates.lastMessageAt = params.updateData.lastMessageAt
+      }
+      if (params.updateData.lastFeed !== undefined) {
+        updates.lastFeed = params.updateData.lastFeed
+      }
+      if (params.updateData.dailyMessageCount !== undefined) {
+        updates.dailyMessageCount = params.updateData.dailyMessageCount
+      }
+
+      const userGuild = yield* userGuildRepo.update(
+        params.userId,
+        params.guildId,
+        updates
+      )
+      const serializedUserGuild: SerializedUserGuild =
+        serializeBigInt(userGuild)
+
+      return {
+        data: {
+          userGuild: serializedUserGuild,
+        },
+      }
+    }).pipe(
+      Effect.catchAll(() => {
+        return Effect.succeed({
+          error: {
+            code: 500,
+            message: 'Failed to update user-guild relationship',
+          },
+        })
+      }),
+      Effect.provide(AllRepositoriesLive)
+    )
+
+    return await Effect.runPromise(program)
+  })
 
 export const ServerRoute = createServerFileRoute('/api/user-guilds')
   .middleware([authorizationMiddleware])
   .methods({
-    // Create a new user-guild relationship
-    POST: async ({ request }) => {
-      const body = await request.text()
-
-      const program = Effect.gen(function* () {
-        const userGuildRepo = yield* UserGuildRepository
-        const parsed = yield* jsonParseSafe(body)
-        const userGuildData = yield* Schema.decodeUnknown(
-          CreateUserGuildSchema
-        )(parsed)
-
-        const newUserGuild: NewUserGuild = {
-          userId: BigInt(userGuildData.userId),
-          guildId: BigInt(userGuildData.guildId),
-          intimacy: userGuildData.intimacy || 0,
-          insertedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }
-
-        const userGuild = yield* userGuildRepo.create(newUserGuild)
-        const serializedUserGuild = serializeBigInt(userGuild)
-        return json({ userGuild: serializedUserGuild }, { status: 201 })
-      }).pipe(
-        Effect.catchAll((error) => {
-          if (error._tag === 'JsonParseError') {
-            return Effect.succeed(
-              json({ error: 'Invalid JSON in request body' }, { status: 400 })
-            )
-          }
-
-          if (error._tag === 'ParseError') {
-            return Effect.succeed(
-              json({ error: 'Invalid user-guild data format' }, { status: 400 })
-            )
-          }
-
-          return Effect.succeed(
-            json(
-              { error: 'Failed to create user-guild relationship' },
-              { status: 500 }
-            )
-          )
-        }),
-        Effect.provide(AllRepositoriesLive)
-      )
-
-      return await Effect.runPromise(program)
-    },
-
-    // Get all user-guild relationships, or specific one with query params
     GET: async ({ request }) => {
       const url = new URL(request.url)
       const userId = url.searchParams.get('userId')
       const guildId = url.searchParams.get('guildId')
 
-      const program = Effect.gen(function* () {
-        const userGuildRepo = yield* UserGuildRepository
+      // If both userId and guildId provided, get specific relationship
+      if (userId && guildId) {
+        try {
+          const res = await getUserGuild({
+            data: {
+              userId,
+              guildId,
+            },
+          })
 
-        // If both userId and guildId provided, get specific relationship
-        if (userId && guildId) {
-          const userGuild = yield* userGuildRepo.findByUserAndGuild(
-            BigInt(userId),
-            BigInt(guildId)
-          )
-
-          if (!userGuild) {
-            return json(
-              { error: 'User-guild relationship not found' },
-              { status: 404 }
-            )
+          if ('error' in res && res.error) {
+            return json(res, { status: res.error.code })
           }
 
-          const serializedUserGuild = serializeBigInt(userGuild)
-          return json({ userGuild: serializedUserGuild })
+          return json(res)
+        } catch (error) {
+          if (error instanceof z.ZodError)
+            return buildValidationErrorResponse(error)
+        }
+      }
+
+      // Otherwise, get all user-guild relationships
+      const res = await getUserGuilds()
+
+      if ('error' in res && res.error) {
+        return json(res, { status: res.error.code })
+      }
+
+      return json(res)
+    },
+    POST: async ({ request }) => {
+      const body = await request.text()
+
+      try {
+        const parsedBody = JSON.parse(body)
+        const res = await createUserGuild({ data: parsedBody })
+
+        if ('error' in res) {
+          return json({ error: res.error }, { status: res.error?.code || 500 })
         }
 
-        // Otherwise, get all user-guild relationships
-        const userGuilds = yield* userGuildRepo.findAll()
-        const serializedUserGuilds = serializeBigInt(userGuilds)
-        return json({ userGuilds: serializedUserGuilds })
-      }).pipe(
-        Effect.catchAll(() =>
-          Effect.succeed(
-            json(
-              { error: 'Failed to fetch user-guild relationships' },
-              { status: 500 }
-            )
-          )
-        ),
-        Effect.provide(AllRepositoriesLive)
-      )
-
-      return await Effect.runPromise(program)
+        return json(res, { status: 201 })
+      } catch (error) {
+        return buildInvalidBodyErrorResponse()
+      }
     },
-
-    // Update user-guild relationship
     PUT: async ({ request }) => {
       const body = await request.text()
       const url = new URL(request.url)
       const userId = url.searchParams.get('userId')
       const guildId = url.searchParams.get('guildId')
 
-      if (!userId || !guildId) {
-        return json(
-          { error: 'Both userId and guildId query parameters are required' },
-          { status: 400 }
-        )
+      try {
+        const parsedBody = JSON.parse(body)
+        const res = await updateUserGuild({
+          data: {
+            userId,
+            guildId,
+            updateData: parsedBody,
+          },
+        })
+
+        if ('error' in res) {
+          return json({ error: res.error }, { status: res.error.code })
+        }
+
+        return json(res)
+      } catch (error) {
+        if (error instanceof z.ZodError)
+          return buildValidationErrorResponse(error)
+
+        return buildInvalidBodyErrorResponse()
       }
-
-      const program = Effect.gen(function* () {
-        const userGuildRepo = yield* UserGuildRepository
-        const parsed = yield* jsonParseSafe(body)
-        const updateData = yield* Schema.decodeUnknown(UpdateUserGuildSchema)(
-          parsed
-        )
-
-        const updates: Partial<UserGuild> = {}
-        if (updateData.intimacy !== undefined) {
-          updates.intimacy = updateData.intimacy
-        }
-        if (updateData.lastMessageAt !== undefined) {
-          updates.lastMessageAt = updateData.lastMessageAt
-        }
-        if (updateData.lastFeed !== undefined) {
-          updates.lastFeed = updateData.lastFeed
-        }
-        if (updateData.dailyMessageCount !== undefined) {
-          updates.dailyMessageCount = BigInt(updateData.dailyMessageCount)
-        }
-
-        const userGuild = yield* userGuildRepo.update(
-          BigInt(userId),
-          BigInt(guildId),
-          updates
-        )
-        const serializedUserGuild = serializeBigInt(userGuild)
-        return json({ userGuild: serializedUserGuild })
-      }).pipe(
-        Effect.catchAll((error) => {
-          if (error._tag === 'JsonParseError') {
-            return Effect.succeed(
-              json({ error: 'Invalid JSON in request body' }, { status: 400 })
-            )
-          }
-
-          if (error._tag === 'ParseError') {
-            return Effect.succeed(
-              json({ error: 'Invalid update data format' }, { status: 400 })
-            )
-          }
-
-          return Effect.succeed(
-            json(
-              { error: 'Failed to update user-guild relationship' },
-              { status: 500 }
-            )
-          )
-        }),
-        Effect.provide(AllRepositoriesLive)
-      )
-
-      return await Effect.runPromise(program)
     },
   })

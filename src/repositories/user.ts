@@ -3,6 +3,7 @@ import { Context, Effect, Layer } from 'effect'
 import { users } from '../db'
 import { Database, DatabaseError } from '../services/database'
 import type { SerializeBigInt } from '../utils/bigint'
+import { isUniqueConstraintError } from '../utils/drizzle'
 
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
@@ -61,10 +62,17 @@ const make = Effect.gen(function* () {
             .values(userData)
             .returning()
             .then((rows) => rows[0]),
-        catch: (error) =>
-          new UserRepositoryError({
+        catch: (error) => {
+          if (isUniqueConstraintError(error))
+            return new UserRepositoryError({
+              message: `Failed to create user: ${error}`,
+              type: 'UniqueConstraint',
+            })
+
+          return new UserRepositoryError({
             message: `Failed to create user: ${error}`,
-          }),
+          })
+        },
       }),
 
     update: (userId: bigint, updates: Partial<User>) =>

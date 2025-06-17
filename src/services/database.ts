@@ -7,6 +7,7 @@ import * as schema from '../db/schema'
 
 export class DatabaseError extends Data.TaggedError('DatabaseError')<{
   message: unknown
+  type?: 'UniqueConstraint'
 }> {}
 
 export class Database extends Context.Tag('Database')<
