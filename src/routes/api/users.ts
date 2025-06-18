@@ -1,51 +1,29 @@
-import { createServerFn, json } from '@tanstack/react-start'
+import { json } from '@tanstack/react-start'
 import { createServerFileRoute } from '@tanstack/react-start/server'
 import { Effect } from 'effect'
 import { z } from 'zod/v4'
+import {
+  CreateUserSchema,
+  createUser,
+  createUserEffect,
+  getUsers,
+  getUsersEffect,
+} from '../../actions/user'
 import { authorizationMiddleware } from '../../middlewares/authorization'
-import type { NewUser } from '../../repositories/user'
-import { AllRepositoriesLive } from '../../services/repositories'
-import { createUserTask, getUsersTask } from '../../tasks'
+import { UserServiceLive } from '../../services'
 import {
   buildInvalidBodyErrorResponse,
   buildValidationErrorResponse,
 } from '../../utils'
 
-const CreateUserSchema = z.object({
-  userId: z.coerce.bigint(),
-  role: z.string().optional(),
-  messageCredits: z.coerce.bigint().optional(),
-})
-
-export const getUsers = createServerFn().handler(async () => {
-  return await Effect.runPromise(
-    getUsersTask.pipe(Effect.provide(AllRepositoriesLive))
-  )
-})
-
-export const createUser = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => {
-    return CreateUserSchema.parse(data)
-  })
-  .handler(async ({ data: userData }) => {
-    const newUser: NewUser = {
-      userId: userData.userId,
-      role: userData.role || 'user',
-      messageCredits: userData.messageCredits || BigInt(30),
-      insertedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
-
-    return await Effect.runPromise(
-      createUserTask(newUser).pipe(Effect.provide(AllRepositoriesLive))
-    )
-  })
-
 export const ServerRoute = createServerFileRoute('/api/users')
   .middleware([authorizationMiddleware])
   .methods({
     GET: async () => {
-      const res = await getUsers()
+      const res = await Effect.runPromise(
+        getUsersEffect.pipe(Effect.provide(UserServiceLive))
+      )
+
       if ('error' in res) {
         return json(res, { status: res.error.code })
       }
@@ -57,7 +35,11 @@ export const ServerRoute = createServerFileRoute('/api/users')
 
       try {
         const parsedBody = JSON.parse(body)
-        const res = await createUser({ data: parsedBody })
+        const { userId, role } = CreateUserSchema.parse(parsedBody)
+
+        const res = await Effect.runPromise(
+          createUserEffect(userId, role).pipe(Effect.provide(UserServiceLive))
+        )
 
         if ('error' in res) {
           return json({ error: res.error }, { status: res.error.code })

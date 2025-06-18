@@ -1,11 +1,12 @@
 import { Context, Effect, Layer } from 'effect'
 import {
-  type NewUser,
+  type CreateUserInput,
   type User,
   UserRepository,
   type UserRepositoryError,
   UserRepositoryLive,
 } from '../repositories/user'
+import { UserRepositoryMock } from '../repositories/user.mock'
 import { DatabaseError, DatabaseLive } from './database'
 
 export class UserServiceError extends DatabaseError {}
@@ -37,7 +38,16 @@ export class UserService extends Context.Tag('UserService')<
      * Simple delegations to repository (you could expose these directly)
      */
     getUser: (userId: bigint) => Effect.Effect<User | null, UserRepositoryError>
-    createUser: (userId: bigint) => Effect.Effect<User, UserRepositoryError>
+    getUsers: () => Effect.Effect<User[], UserRepositoryError>
+    createUser: (
+      userId: bigint,
+      role?: 'user' | 'admin'
+    ) => Effect.Effect<User, UserRepositoryError>
+    updateUser: (
+      userId: bigint,
+      updates: Partial<User>
+    ) => Effect.Effect<User, UserRepositoryError>
+    deleteUser: (userId: bigint) => Effect.Effect<void, UserRepositoryError>
   }
 >() {}
 
@@ -51,11 +61,8 @@ const make = Effect.gen(function* () {
         if (existingUser) return existingUser
 
         // Create new user with business logic defaults
-        const now = new Date().toISOString()
-        const newUserData: NewUser = {
+        const newUserData: CreateUserInput = {
           userId,
-          insertedAt: now,
-          updatedAt: now,
           role: 'user' as const,
           lastVotedAt: null,
         }
@@ -83,23 +90,37 @@ const make = Effect.gen(function* () {
       }),
 
     getUser: (userId: bigint) => userRepo.findById(userId),
-
-    createUser: (userId: bigint) =>
+    getUsers: () => userRepo.findAll(),
+    createUser: (userId: bigint, role?: 'user' | 'admin') =>
       Effect.gen(function* () {
-        const now = new Date().toISOString()
-        const userData: NewUser = {
+        const userData: CreateUserInput = {
           userId,
-          insertedAt: now,
-          updatedAt: now,
-          role: 'user' as const,
+          role,
           lastVotedAt: null,
         }
         return yield* userRepo.create(userData)
       }),
+    updateUser: (userId: bigint, updates: Partial<User>) =>
+      Effect.gen(function* () {
+        const user = yield* userRepo.findById(userId)
+        if (!user) {
+          return yield* Effect.fail(
+            new UserServiceError({ message: `User ${userId} not found` })
+          )
+        }
+        const updatedUser = yield* userRepo.update(userId, updates)
+        return updatedUser
+      }),
+    deleteUser: (userId) => userRepo.delete(userId),
   })
 })
 
 export const UserServiceLive = Layer.effect(UserService, make).pipe(
   Layer.provide(UserRepositoryLive),
+  Layer.provide(DatabaseLive)
+)
+
+export const UserServiceMock = Layer.effect(UserService, make).pipe(
+  Layer.provide(UserRepositoryMock),
   Layer.provide(DatabaseLive)
 )

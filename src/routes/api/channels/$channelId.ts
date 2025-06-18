@@ -1,104 +1,83 @@
 import { json } from '@tanstack/react-start'
 import { createServerFileRoute } from '@tanstack/react-start/server'
-import { Effect, Schema } from 'effect'
-import { type Channel, ChannelRepository } from '../../../repositories/channel'
-import { AllRepositoriesLive } from '../../../services/repositories'
-import { jsonParseSafe } from '../../../utils'
-import { serializeBigInt } from '../../../utils/bigint'
-
-const UpdateChannelSchema = Schema.Struct({
-  // Channels typically don't have many updatable fields in Discord bots
-  // Add any custom fields you might want to update
-})
+import { Effect } from 'effect'
+import { z } from 'zod/v4'
+import {
+  UpdateChannelSchema,
+  channelIdSchema,
+  deleteChannelEffect,
+  getChannelEffect,
+  updateChannelEffect,
+} from '../../../actions/channel'
+import { ChannelServiceLive } from '../../../services'
+import { buildValidationErrorResponse } from '../../../utils'
 
 export const ServerRoute = createServerFileRoute(
   '/api/channels/$channelId'
 ).methods({
-  // Get channel by ID
   GET: async ({ params }) => {
-    const program = Effect.gen(function* () {
-      const channelRepo = yield* ChannelRepository
-      const channelId = BigInt(params.channelId)
-      const channel = yield* channelRepo.findById(channelId)
+    try {
+      const channelId = channelIdSchema.parse(params.channelId)
+      const res = await Effect.runPromise(
+        getChannelEffect(channelId).pipe(Effect.provide(ChannelServiceLive))
+      )
 
-      if (!channel) {
-        return json({ error: 'Channel not found' }, { status: 404 })
+      if ('error' in res && res.error) {
+        return json(res, { status: res.error.code })
       }
 
-      const serializedChannel = serializeBigInt(channel)
-      return json({ channel: serializedChannel })
-    }).pipe(
-      Effect.catchAll(() =>
-        Effect.succeed(
-          json({ error: 'Failed to fetch channel' }, { status: 500 })
-        )
-      ),
-      Effect.provide(AllRepositoriesLive)
-    )
-
-    return await Effect.runPromise(program)
+      return json(res)
+    } catch (error) {
+      if (error instanceof z.ZodError)
+        return buildValidationErrorResponse(error)
+      return json({ error: 'Invalid request' }, { status: 400 })
+    }
   },
 
-  // Update channel
   PUT: async ({ request, params }) => {
     const body = await request.text()
 
-    const program = Effect.gen(function* () {
-      const channelRepo = yield* ChannelRepository
-      const parsed = yield* jsonParseSafe(body)
-      const updateData =
-        yield* Schema.decodeUnknown(UpdateChannelSchema)(parsed)
+    try {
+      const channelId = channelIdSchema.parse(params.channelId)
+      const parsed = JSON.parse(body)
+      const updateData = UpdateChannelSchema.parse({
+        channelId,
+        ...parsed,
+      })
 
-      const channelId = BigInt(params.channelId)
+      const res = await Effect.runPromise(
+        updateChannelEffect(updateData).pipe(Effect.provide(ChannelServiceLive))
+      )
 
-      const updates: Partial<Channel> = {
-        updatedAt: new Date().toISOString(),
+      if ('error' in res && res.error) {
+        return json(res, { status: res.error.code })
       }
 
-      const channel = yield* channelRepo.update(channelId, updates)
-      const serializedChannel = serializeBigInt(channel)
-      return json({ channel: serializedChannel })
-    }).pipe(
-      Effect.catchAll((error) => {
-        if (error._tag === 'JsonParseError') {
-          return Effect.succeed(
-            json({ error: 'Invalid JSON in request body' }, { status: 400 })
-          )
-        }
-
-        if (error._tag === 'ParseError') {
-          return Effect.succeed(
-            json({ error: 'Invalid update data format' }, { status: 400 })
-          )
-        }
-
-        return Effect.succeed(
-          json({ error: 'Failed to update channel' }, { status: 500 })
-        )
-      }),
-      Effect.provide(AllRepositoriesLive)
-    )
-
-    return await Effect.runPromise(program)
+      return json(res)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return buildValidationErrorResponse(error)
+      }
+      return json({ error: 'Invalid request' }, { status: 400 })
+    }
   },
 
-  // Delete channel
   DELETE: async ({ params }) => {
-    const program = Effect.gen(function* () {
-      const channelRepo = yield* ChannelRepository
-      const channelId = BigInt(params.channelId)
-      yield* channelRepo.delete(channelId)
+    try {
+      const channelId = channelIdSchema.parse(params.channelId)
+      const res = await Effect.runPromise(
+        deleteChannelEffect(channelId).pipe(Effect.provide(ChannelServiceLive))
+      )
 
-      return json({ message: 'Channel deleted successfully' })
-    }).pipe(
-      Effect.catchAll(() =>
-        Effect.succeed(
-          json({ error: 'Failed to delete channel' }, { status: 500 })
-        )
-      ),
-      Effect.provide(AllRepositoriesLive)
-    )
+      if ('error' in res && res.error) {
+        return json(res, { status: res.error.code })
+      }
 
-    return await Effect.runPromise(program)
+      return json(res)
+    } catch (error) {
+      if (error instanceof z.ZodError)
+        return buildValidationErrorResponse(error)
+      return json({ error: 'Invalid request' }, { status: 400 })
+    }
   },
 })

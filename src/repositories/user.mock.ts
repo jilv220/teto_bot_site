@@ -1,6 +1,6 @@
 import { Effect, Layer } from 'effect'
 import { UserRepository, UserRepositoryError } from './user'
-import type { NewUser, User } from './user'
+import type { CreateUserInput, NewUser, User } from './user'
 
 const makeMock = Effect.gen(function* () {
   const users = new Map<bigint, User>()
@@ -11,7 +11,7 @@ const makeMock = Effect.gen(function* () {
 
     findAll: () => Effect.succeed(Array.from(users.values())),
 
-    create: (userData: NewUser) =>
+    create: (userData: CreateUserInput) =>
       Effect.gen(function* () {
         // Check for unique constraint if userId is provided
         if (userData.userId && users.has(userData.userId)) {

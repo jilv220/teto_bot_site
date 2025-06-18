@@ -21,7 +21,6 @@ import { ServerRoute as ApiChannelsServerRouteImport } from './routes/api/channe
 import { ServerRoute as ApiUsersUserIdServerRouteImport } from './routes/api/users/$userId'
 import { ServerRoute as ApiGuildsGuildIdServerRouteImport } from './routes/api/guilds/$guildId'
 import { ServerRoute as ApiChannelsChannelIdServerRouteImport } from './routes/api/channels/$channelId'
-import { ServerRoute as ApiGuildsGuildIdChannelsServerRouteImport } from './routes/api/guilds/$guildId/channels'
 
 const rootServerRouteImport = createServerRootRoute()
 
@@ -76,12 +75,6 @@ const ApiChannelsChannelIdServerRoute =
     path: '/$channelId',
     getParentRoute: () => ApiChannelsServerRoute,
   } as any)
-const ApiGuildsGuildIdChannelsServerRoute =
-  ApiGuildsGuildIdChannelsServerRouteImport.update({
-    id: '/channels',
-    path: '/channels',
-    getParentRoute: () => ApiGuildsGuildIdServerRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -112,9 +105,8 @@ export interface FileServerRoutesByFullPath {
   '/api/users': typeof ApiUsersServerRouteWithChildren
   '/api/webhook': typeof ApiWebhookServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
-  '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRouteWithChildren
+  '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
   '/api/users/$userId': typeof ApiUsersUserIdServerRoute
-  '/api/guilds/$guildId/channels': typeof ApiGuildsGuildIdChannelsServerRoute
 }
 export interface FileServerRoutesByTo {
   '/api/channels': typeof ApiChannelsServerRouteWithChildren
@@ -124,9 +116,8 @@ export interface FileServerRoutesByTo {
   '/api/users': typeof ApiUsersServerRouteWithChildren
   '/api/webhook': typeof ApiWebhookServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
-  '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRouteWithChildren
+  '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
   '/api/users/$userId': typeof ApiUsersUserIdServerRoute
-  '/api/guilds/$guildId/channels': typeof ApiGuildsGuildIdChannelsServerRoute
 }
 export interface FileServerRoutesById {
   __root__: typeof rootServerRouteImport
@@ -137,9 +128,8 @@ export interface FileServerRoutesById {
   '/api/users': typeof ApiUsersServerRouteWithChildren
   '/api/webhook': typeof ApiWebhookServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
-  '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRouteWithChildren
+  '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
   '/api/users/$userId': typeof ApiUsersUserIdServerRoute
-  '/api/guilds/$guildId/channels': typeof ApiGuildsGuildIdChannelsServerRoute
 }
 export interface FileServerRouteTypes {
   fileServerRoutesByFullPath: FileServerRoutesByFullPath
@@ -153,7 +143,6 @@ export interface FileServerRouteTypes {
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
     | '/api/users/$userId'
-    | '/api/guilds/$guildId/channels'
   fileServerRoutesByTo: FileServerRoutesByTo
   to:
     | '/api/channels'
@@ -165,7 +154,6 @@ export interface FileServerRouteTypes {
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
     | '/api/users/$userId'
-    | '/api/guilds/$guildId/channels'
   id:
     | '__root__'
     | '/api/channels'
@@ -177,7 +165,6 @@ export interface FileServerRouteTypes {
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
     | '/api/users/$userId'
-    | '/api/guilds/$guildId/channels'
   fileServerRoutesById: FileServerRoutesById
 }
 export interface RootServerRouteChildren {
@@ -265,13 +252,6 @@ declare module '@tanstack/react-start/server' {
       preLoaderRoute: typeof ApiChannelsChannelIdServerRouteImport
       parentRoute: typeof ApiChannelsServerRoute
     }
-    '/api/guilds/$guildId/channels': {
-      id: '/api/guilds/$guildId/channels'
-      path: '/channels'
-      fullPath: '/api/guilds/$guildId/channels'
-      preLoaderRoute: typeof ApiGuildsGuildIdChannelsServerRouteImport
-      parentRoute: typeof ApiGuildsGuildIdServerRoute
-    }
   }
 }
 
@@ -286,26 +266,12 @@ const ApiChannelsServerRouteChildren: ApiChannelsServerRouteChildren = {
 const ApiChannelsServerRouteWithChildren =
   ApiChannelsServerRoute._addFileChildren(ApiChannelsServerRouteChildren)
 
-interface ApiGuildsGuildIdServerRouteChildren {
-  ApiGuildsGuildIdChannelsServerRoute: typeof ApiGuildsGuildIdChannelsServerRoute
-}
-
-const ApiGuildsGuildIdServerRouteChildren: ApiGuildsGuildIdServerRouteChildren =
-  {
-    ApiGuildsGuildIdChannelsServerRoute: ApiGuildsGuildIdChannelsServerRoute,
-  }
-
-const ApiGuildsGuildIdServerRouteWithChildren =
-  ApiGuildsGuildIdServerRoute._addFileChildren(
-    ApiGuildsGuildIdServerRouteChildren,
-  )
-
 interface ApiGuildsServerRouteChildren {
-  ApiGuildsGuildIdServerRoute: typeof ApiGuildsGuildIdServerRouteWithChildren
+  ApiGuildsGuildIdServerRoute: typeof ApiGuildsGuildIdServerRoute
 }
 
 const ApiGuildsServerRouteChildren: ApiGuildsServerRouteChildren = {
-  ApiGuildsGuildIdServerRoute: ApiGuildsGuildIdServerRouteWithChildren,
+  ApiGuildsGuildIdServerRoute: ApiGuildsGuildIdServerRoute,
 }
 
 const ApiGuildsServerRouteWithChildren = ApiGuildsServerRoute._addFileChildren(

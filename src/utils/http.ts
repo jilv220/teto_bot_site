@@ -6,6 +6,22 @@ export class JsonParseError extends Data.TaggedError('JsonParseError')<{
   message: unknown
 }> {}
 
+export type ServerErrorResponse = {
+  error: {
+    code: number
+    message: unknown
+    details: unknown
+  }
+}
+
+export type ServerSuccessResponse = {
+  data: {
+    [key: string]: unknown
+  }
+}
+
+export type ServerResponse = ServerSuccessResponse | ServerErrorResponse
+
 export const jsonParseSafe = (input: string) =>
   Effect.try({
     try: () => JSON.parse(input),

@@ -1,104 +1,82 @@
 import { json } from '@tanstack/react-start'
 import { createServerFileRoute } from '@tanstack/react-start/server'
-import { Effect, Schema } from 'effect'
-import { type Guild, GuildRepository } from '../../../repositories/guild'
-import { AllRepositoriesLive } from '../../../services/repositories'
-import { jsonParseSafe } from '../../../utils'
-import { serializeBigInt } from '../../../utils/bigint'
-
-const UpdateGuildSchema = Schema.Struct({
-  // Guilds typically don't have many updatable fields in Discord bots
-  // but we can add any custom fields you might want to update
-})
+import { Effect } from 'effect'
+import { z } from 'zod/v4'
+import {
+  UpdateGuildSchema,
+  deleteGuildEffect,
+  getGuildEffect,
+  guildIdSchema,
+  updateGuildEffect,
+} from '../../../actions/guild'
+import { GuildServiceLive } from '../../../services'
+import { buildValidationErrorResponse } from '../../../utils'
 
 export const ServerRoute = createServerFileRoute(
   '/api/guilds/$guildId'
 ).methods({
-  // Get guild by ID
   GET: async ({ params }) => {
-    const program = Effect.gen(function* () {
-      const guildRepo = yield* GuildRepository
-      const guildId = BigInt(params.guildId)
-      const guild = yield* guildRepo.findById(guildId)
+    try {
+      const guildId = guildIdSchema.parse(params.guildId)
+      const res = await Effect.runPromise(
+        getGuildEffect(guildId).pipe(Effect.provide(GuildServiceLive))
+      )
 
-      if (!guild) {
-        return json({ error: 'Guild not found' }, { status: 404 })
+      if ('error' in res && res.error) {
+        return json(res, { status: res.error.code })
       }
 
-      const serializedGuild = serializeBigInt(guild)
-      return json({ guild: serializedGuild })
-    }).pipe(
-      Effect.catchAll(() =>
-        Effect.succeed(
-          json({ error: 'Failed to fetch guild' }, { status: 500 })
-        )
-      ),
-      Effect.provide(AllRepositoriesLive)
-    )
-
-    return await Effect.runPromise(program)
+      return json(res)
+    } catch (error) {
+      if (error instanceof z.ZodError)
+        return buildValidationErrorResponse(error)
+      return json({ error: 'Invalid request' }, { status: 400 })
+    }
   },
 
-  // Update guild
   PUT: async ({ request, params }) => {
     const body = await request.text()
 
-    const program = Effect.gen(function* () {
-      const guildRepo = yield* GuildRepository
-      const parsed = yield* jsonParseSafe(body)
-      const updateData = yield* Schema.decodeUnknown(UpdateGuildSchema)(parsed)
+    try {
+      const guildId = guildIdSchema.parse(params.guildId)
+      const parsed = JSON.parse(body)
+      const updateData = UpdateGuildSchema.parse(parsed)
 
-      const guildId = BigInt(params.guildId)
+      const res = await Effect.runPromise(
+        updateGuildEffect(guildId, updateData).pipe(
+          Effect.provide(GuildServiceLive)
+        )
+      )
 
-      const updates: Partial<Guild> = {
-        // Add any update fields here based on your schema
-        updatedAt: new Date().toISOString(),
+      if ('error' in res && res.error) {
+        return json(res, { status: res.error.code })
       }
 
-      const guild = yield* guildRepo.update(guildId, updates)
-      const serializedGuild = serializeBigInt(guild)
-      return json({ guild: serializedGuild })
-    }).pipe(
-      Effect.catchAll((error) => {
-        if (error._tag === 'JsonParseError') {
-          return Effect.succeed(
-            json({ error: 'Invalid JSON in request body' }, { status: 400 })
-          )
-        }
-
-        if (error._tag === 'ParseError') {
-          return Effect.succeed(
-            json({ error: 'Invalid update data format' }, { status: 400 })
-          )
-        }
-
-        return Effect.succeed(
-          json({ error: 'Failed to update guild' }, { status: 500 })
-        )
-      }),
-      Effect.provide(AllRepositoriesLive)
-    )
-
-    return await Effect.runPromise(program)
+      return json(res)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return buildValidationErrorResponse(error)
+      }
+      return json({ error: 'Invalid request' }, { status: 400 })
+    }
   },
 
-  // Delete guild
   DELETE: async ({ params }) => {
-    const program = Effect.gen(function* () {
-      const guildRepo = yield* GuildRepository
-      const guildId = BigInt(params.guildId)
-      yield* guildRepo.delete(guildId)
+    try {
+      const guildId = guildIdSchema.parse(params.guildId)
+      const res = await Effect.runPromise(
+        deleteGuildEffect(guildId).pipe(Effect.provide(GuildServiceLive))
+      )
 
-      return json({ message: 'Guild deleted successfully' })
-    }).pipe(
-      Effect.catchAll(() =>
-        Effect.succeed(
-          json({ error: 'Failed to delete guild' }, { status: 500 })
-        )
-      ),
-      Effect.provide(AllRepositoriesLive)
-    )
+      if ('error' in res && res.error) {
+        return json(res, { status: res.error.code })
+      }
 
-    return await Effect.runPromise(program)
+      return json(res)
+    } catch (error) {
+      if (error instanceof z.ZodError)
+        return buildValidationErrorResponse(error)
+      return json({ error: 'Invalid request' }, { status: 400 })
+    }
   },
 })

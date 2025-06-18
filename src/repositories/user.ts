@@ -10,6 +10,12 @@ export type NewUser = typeof users.$inferInsert
 export type SerializedUser = SerializeBigInt<User>
 export class UserRepositoryError extends DatabaseError {}
 
+// Repository input type that makes timestamps optional since repository handles them
+export type CreateUserInput = Omit<NewUser, 'insertedAt' | 'updatedAt'> & {
+  insertedAt?: string
+  updatedAt?: string
+}
+
 export class UserRepository extends Context.Tag('UserRepository')<
   UserRepository,
   {
@@ -17,7 +23,9 @@ export class UserRepository extends Context.Tag('UserRepository')<
       userId: bigint
     ) => Effect.Effect<User | null, UserRepositoryError>
     findAll: () => Effect.Effect<User[], UserRepositoryError>
-    create: (userData: NewUser) => Effect.Effect<User, UserRepositoryError>
+    create: (
+      userData: CreateUserInput
+    ) => Effect.Effect<User, UserRepositoryError>
     update: (
       userId: bigint,
       updates: Partial<User>
@@ -54,14 +62,21 @@ const make = Effect.gen(function* () {
           }),
       }),
 
-    create: (userData: NewUser) =>
+    create: (userData: CreateUserInput) =>
       Effect.tryPromise({
-        try: () =>
-          db
+        try: async () => {
+          const now = new Date().toISOString()
+          const dataWithTimestamps = {
+            ...userData,
+            insertedAt: userData.insertedAt || now,
+            updatedAt: userData.updatedAt || now,
+          }
+          const rows = await db
             .insert(users)
-            .values(userData)
+            .values(dataWithTimestamps)
             .returning()
-            .then((rows) => rows[0]),
+          return rows[0]
+        },
         catch: (error) => {
           if (isUniqueConstraintError(error))
             return new UserRepositoryError({
