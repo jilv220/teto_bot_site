@@ -3,6 +3,7 @@ import { Context, Effect, Layer } from 'effect'
 import { channels } from '../db'
 import { Database, DatabaseError } from '../services/database'
 import type { SerializeBigInt } from '../utils/bigint'
+import { isUniqueConstraintError } from '../utils/drizzle'
 
 export type Channel = typeof channels.$inferSelect
 export type NewChannel = typeof channels.$inferInsert
@@ -26,7 +27,9 @@ export class ChannelRepository extends Context.Tag('ChannelRepository')<
       channelId: bigint,
       updates: Partial<Channel>
     ) => Effect.Effect<Channel, ChannelRepositoryError>
-    delete: (channelId: bigint) => Effect.Effect<void, ChannelRepositoryError>
+    delete: (
+      channelId: bigint
+    ) => Effect.Effect<Channel | null, ChannelRepositoryError>
   }
 >() {}
 
@@ -76,10 +79,17 @@ const make = Effect.gen(function* () {
             .values(channelData)
             .returning()
             .then((rows) => rows[0]),
-        catch: (error) =>
-          new ChannelRepositoryError({
+        catch: (error) => {
+          if (isUniqueConstraintError(error))
+            return new ChannelRepositoryError({
+              message: `Failed to create channel: ${error}`,
+              type: 'UniqueConstraint',
+            })
+
+          return new ChannelRepositoryError({
             message: `Failed to create channel: ${error}`,
-          }),
+          })
+        },
       }),
 
     update: (channelId: bigint, updates: Partial<Channel>) =>
@@ -99,7 +109,12 @@ const make = Effect.gen(function* () {
 
     delete: (channelId: bigint) =>
       Effect.tryPromise({
-        try: () => db.delete(channels).where(eq(channels.channelId, channelId)),
+        try: () =>
+          db
+            .delete(channels)
+            .where(eq(channels.channelId, channelId))
+            .returning()
+            .then((rows) => rows[0] || null),
         catch: (error) =>
           new ChannelRepositoryError({
             message: `Failed to delete channel ${channelId}: ${error}`,

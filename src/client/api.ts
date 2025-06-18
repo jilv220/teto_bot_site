@@ -363,11 +363,6 @@ export const tokenApi = {
 }
 
 // Discord Operations Types (Optimized endpoints)
-export interface EnsureUserExistsRequest {
-  userId: string
-  role?: 'user' | 'admin'
-}
-
 export interface EnsureUserGuildExistsRequest {
   userId: string
   guildId: string
@@ -380,13 +375,6 @@ export interface RecordUserMessageRequest {
   messageLength?: number
   intimacyIncrement?: number
   role?: 'user' | 'admin'
-}
-
-export interface EnsureUserExistsResponse {
-  data: {
-    user: User
-    created: boolean
-  }
 }
 
 export interface EnsureUserGuildExistsResponse {
@@ -404,40 +392,21 @@ export interface RecordUserMessageResponse {
     userGuild: UserGuild
     userCreated: boolean
     userGuildCreated: boolean
-    messageLength?: number
   }
 }
 
 // Discord Operations API (optimized for Discord bots)
 export const discordOpsApi = {
   /**
-   * Ensure a user exists, create if not found (atomic operation)
-   */
-  async ensureUserExists(
-    request: EnsureUserExistsRequest
-  ): Promise<ApiResponse<EnsureUserExistsResponse>> {
-    return api<EnsureUserExistsResponse>(
-      '/discord-operations?operation=ensure-user-exists',
-      {
-        method: 'POST',
-        body: request,
-      }
-    )
-  },
-
-  /**
    * Ensure user and user-guild relationship exist (atomic operation)
    */
   async ensureUserGuildExists(
     request: EnsureUserGuildExistsRequest
   ): Promise<ApiResponse<EnsureUserGuildExistsResponse>> {
-    return api<EnsureUserGuildExistsResponse>(
-      '/discord-operations?operation=ensure-user-guild-exists',
-      {
-        method: 'POST',
-        body: request,
-      }
-    )
+    return api<EnsureUserGuildExistsResponse>('/ensure-user-guild-exists', {
+      method: 'POST',
+      body: request,
+    })
   },
 
   /**
@@ -446,13 +415,10 @@ export const discordOpsApi = {
   async recordUserMessage(
     request: RecordUserMessageRequest
   ): Promise<ApiResponse<RecordUserMessageResponse>> {
-    return api<RecordUserMessageResponse>(
-      '/discord-operations?operation=record-user-message',
-      {
-        method: 'POST',
-        body: request,
-      }
-    )
+    return api<RecordUserMessageResponse>('/record-user-message', {
+      method: 'POST',
+      body: request,
+    })
   },
 }
 

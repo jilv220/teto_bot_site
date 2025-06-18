@@ -36,7 +36,7 @@ export class ChannelService extends Context.Tag('ChannelService')<
     ) => Effect.Effect<Channel, ChannelRepositoryError>
     deleteChannel: (
       channelId: bigint
-    ) => Effect.Effect<void, ChannelRepositoryError>
+    ) => Effect.Effect<Channel | null, ChannelRepositoryError>
   }
 >() {}
 

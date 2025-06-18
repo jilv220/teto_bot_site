@@ -2,7 +2,11 @@ import { createServerFn } from '@tanstack/react-start'
 import { Effect, Schema } from 'effect'
 import { z } from 'zod/v4'
 import type { NewChannel, SerializedChannel } from '../repositories/channel'
-import { ChannelService, ChannelServiceLive } from '../services'
+import {
+  ChannelService,
+  ChannelServiceError,
+  ChannelServiceLive,
+} from '../services'
 import { serializeBigInt } from '../utils/bigint'
 
 export const channelIdSchema = z.coerce.bigint()
@@ -147,7 +151,15 @@ export const updateChannelEffect = (
 export const deleteChannelEffect = (channelId: bigint) =>
   Effect.gen(function* () {
     const channelService = yield* ChannelService
-    yield* channelService.deleteChannel(channelId)
+    const deletedChannel = yield* channelService.deleteChannel(channelId)
+
+    if (!deletedChannel)
+      return {
+        error: {
+          code: 404,
+          message: 'Channel not found',
+        },
+      }
 
     return {
       data: {
