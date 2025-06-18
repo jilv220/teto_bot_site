@@ -362,6 +362,100 @@ export const tokenApi = {
   },
 }
 
+// Discord Operations Types (Optimized endpoints)
+export interface EnsureUserExistsRequest {
+  userId: string
+  role?: 'user' | 'admin'
+}
+
+export interface EnsureUserGuildExistsRequest {
+  userId: string
+  guildId: string
+  role?: 'user' | 'admin'
+}
+
+export interface RecordUserMessageRequest {
+  userId: string
+  guildId: string
+  messageLength?: number
+  intimacyIncrement?: number
+  role?: 'user' | 'admin'
+}
+
+export interface EnsureUserExistsResponse {
+  data: {
+    user: User
+    created: boolean
+  }
+}
+
+export interface EnsureUserGuildExistsResponse {
+  data: {
+    user: User
+    userGuild: UserGuild
+    userCreated: boolean
+    userGuildCreated: boolean
+  }
+}
+
+export interface RecordUserMessageResponse {
+  data: {
+    user: User
+    userGuild: UserGuild
+    userCreated: boolean
+    userGuildCreated: boolean
+    messageLength?: number
+  }
+}
+
+// Discord Operations API (optimized for Discord bots)
+export const discordOpsApi = {
+  /**
+   * Ensure a user exists, create if not found (atomic operation)
+   */
+  async ensureUserExists(
+    request: EnsureUserExistsRequest
+  ): Promise<ApiResponse<EnsureUserExistsResponse>> {
+    return api<EnsureUserExistsResponse>(
+      '/discord-operations?operation=ensure-user-exists',
+      {
+        method: 'POST',
+        body: request,
+      }
+    )
+  },
+
+  /**
+   * Ensure user and user-guild relationship exist (atomic operation)
+   */
+  async ensureUserGuildExists(
+    request: EnsureUserGuildExistsRequest
+  ): Promise<ApiResponse<EnsureUserGuildExistsResponse>> {
+    return api<EnsureUserGuildExistsResponse>(
+      '/discord-operations?operation=ensure-user-guild-exists',
+      {
+        method: 'POST',
+        body: request,
+      }
+    )
+  },
+
+  /**
+   * Record a user message, ensuring user/guild exist and updating stats (atomic operation)
+   */
+  async recordUserMessage(
+    request: RecordUserMessageRequest
+  ): Promise<ApiResponse<RecordUserMessageResponse>> {
+    return api<RecordUserMessageResponse>(
+      '/discord-operations?operation=record-user-message',
+      {
+        method: 'POST',
+        body: request,
+      }
+    )
+  },
+}
+
 // =====================
 // UTILITY FUNCTIONS
 // =====================
@@ -424,6 +518,8 @@ export const discordBotApi = {
   channels: channelApi,
   userGuilds: userGuildApi,
   tokens: tokenApi,
+  // New optimized operations
+  discord: discordOpsApi,
 }
 
 export default discordBotApi

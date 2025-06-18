@@ -12,6 +12,8 @@ import discordBotApi, {
   type UserGuildsResponse,
   type UserGuildResponse,
   type TokenResponse,
+  type EnsureUserGuildExistsResponse,
+  type RecordUserMessageResponse,
 } from './api'
 
 // Example usage of the Discord Bot API Client
@@ -351,6 +353,97 @@ async function handleDiscordMessage(
   }
 }
 
+/**
+ * Example: Optimized Discord Message Handling (Single API call)
+ */
+async function handleDiscordMessageOptimized(
+  userId: string,
+  guildId: string,
+  message: string
+) {
+  try {
+    // Single atomic operation that handles user creation, guild relationship, and message recording
+    const result = await discordBotApi.discord.recordUserMessage({
+      userId,
+      guildId,
+      messageLength: message.length,
+      intimacyIncrement: 1,
+      role: 'user',
+    })
+
+    if (!isSuccessResponse<RecordUserMessageResponse>(result)) {
+      console.error('Failed to record user message:', getErrorMessage(result))
+      return
+    }
+
+    const { user, userGuild, userCreated, userGuildCreated } = result.data
+
+    // Log what happened
+    if (userCreated) {
+      console.log(`Created new user: ${user.userId}`)
+    }
+    if (userGuildCreated) {
+      console.log(
+        `Created new user-guild relationship: ${user.userId} in ${userGuild.guildId}`
+      )
+    }
+
+    console.log(
+      `Updated user stats: intimacy=${userGuild.intimacy}, dailyMessages=${userGuild.dailyMessageCount}`
+    )
+
+    // Optional: Get token count for the message (separate call since it's a different concern)
+    const tokenResponse = await discordBotApi.tokens.getTokenCount(message)
+    if (isSuccessResponse<TokenResponse>(tokenResponse)) {
+      console.log(
+        `Message from ${userId} has ${tokenResponse.token_count} tokens`
+      )
+    }
+
+    console.log(
+      'Successfully processed Discord message in 1-2 API calls instead of 3-6!'
+    )
+  } catch (error) {
+    console.error(
+      'Error handling Discord message:',
+      error instanceof Error ? error.message : String(error)
+    )
+  }
+}
+
+/**
+ * Example: Ensure User-Guild Relationship Exists (useful for bot join events)
+ */
+async function handleUserJoinGuild(userId: string, guildId: string) {
+  try {
+    const result = await discordBotApi.discord.ensureUserGuildExists({
+      userId,
+      guildId,
+      role: 'user',
+    })
+
+    if (!isSuccessResponse<EnsureUserGuildExistsResponse>(result)) {
+      console.error(
+        'Failed to ensure user-guild exists:',
+        getErrorMessage(result)
+      )
+      return
+    }
+
+    const { user, userGuild, userCreated, userGuildCreated } = result.data
+
+    console.log(`User ${user.userId} joined guild ${userGuild.guildId}`)
+    console.log(
+      `New user: ${userCreated}, New relationship: ${userGuildCreated}`
+    )
+  } catch (error) {
+    console.error(
+      'Error handling user join:',
+      error instanceof Error ? error.message : String(error)
+    )
+  }
+}
+
 // Export examples for use
 export {
   exampleUserOperations,
@@ -359,4 +452,6 @@ export {
   exampleUserGuildOperations,
   exampleTokenOperations,
   handleDiscordMessage,
+  handleDiscordMessageOptimized,
+  handleUserJoinGuild,
 }
