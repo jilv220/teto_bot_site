@@ -1,4 +1,4 @@
-import { and, eq, gt, isNotNull, or } from 'drizzle-orm'
+import { and, desc, eq, gt, isNotNull, or } from 'drizzle-orm'
 import { Context, Effect, Layer } from 'effect'
 import { userGuilds } from '../db'
 import { Database, DatabaseError } from '../services/database'
@@ -21,6 +21,10 @@ export class UserGuildRepository extends Context.Tag('UserGuildRepository')<
       UserGuildRepositoryError
     >
     findAll: () => Effect.Effect<UserGuild[], UserGuildRepositoryError>
+    findIntimacyLeaderboard: (
+      guildId: bigint,
+      limit?: number
+    ) => Effect.Effect<UserGuild[], UserGuildRepositoryError>
     create: (
       userGuildData: NewUserGuild
     ) => Effect.Effect<UserGuild, UserGuildRepositoryError>
@@ -84,6 +88,21 @@ const make = Effect.gen(function* () {
         catch: (error) =>
           new UserGuildRepositoryError({
             message: `Failed to find all user guilds: ${error}`,
+          }),
+      }),
+
+    findIntimacyLeaderboard: (guildId: bigint, limit = 10) =>
+      Effect.tryPromise({
+        try: () =>
+          db
+            .select()
+            .from(userGuilds)
+            .where(eq(userGuilds.guildId, guildId))
+            .orderBy(desc(userGuilds.intimacy))
+            .limit(limit),
+        catch: (error) =>
+          new UserGuildRepositoryError({
+            message: `Failed to get intimacy leaderboard for guild ${guildId}: ${error}`,
           }),
       }),
 

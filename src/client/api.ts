@@ -153,6 +153,22 @@ export interface UserGuildsResponse {
   }
 }
 
+// Leaderboard Types
+export interface LeaderboardEntry extends UserGuild {}
+
+export interface LeaderboardResponse {
+  data: {
+    leaderboard: LeaderboardEntry[]
+    guildId: string
+    limit: number
+  }
+}
+
+export interface LeaderboardRequest {
+  guildId: string
+  limit?: number
+}
+
 // Token Types
 export interface TokenRequest {
   text: string
@@ -161,6 +177,20 @@ export interface TokenRequest {
 export interface TokenResponse {
   token_count: number
   text_length: number
+}
+
+// System Prompt Types
+export interface SetSystemPromptRequest {
+  prompt: string
+}
+
+export interface SystemPromptResponse {
+  prompt: string | null
+}
+
+export interface SetSystemPromptResponse {
+  success: boolean
+  message: string
 }
 
 // Error Types
@@ -349,6 +379,23 @@ export const userGuildApi = {
   },
 }
 
+// Leaderboard API
+export const leaderboardApi = {
+  /**
+   * Get intimacy leaderboard for a guild
+   */
+  async getIntimacyLeaderboard(
+    request: LeaderboardRequest
+  ): Promise<ApiResponse<LeaderboardResponse>> {
+    return api<LeaderboardResponse>('/leaderboard', {
+      query: {
+        guildId: request.guildId,
+        ...(request.limit && { limit: request.limit.toString() }),
+      },
+    })
+  },
+}
+
 // Token API
 export const tokenApi = {
   /**
@@ -358,6 +405,30 @@ export const tokenApi = {
     return api<TokenResponse>('/tokens', {
       method: 'POST',
       body: { text },
+    })
+  },
+}
+
+// System Prompt API
+export const systemPromptApi = {
+  /**
+   * Get the current system prompt
+   */
+  async getSystemPrompt(): Promise<ApiResponse<SystemPromptResponse>> {
+    return api<SystemPromptResponse>('/system-prompt', {
+      method: 'GET',
+    })
+  },
+
+  /**
+   * Set a new system prompt
+   */
+  async setSystemPrompt(
+    prompt: string
+  ): Promise<ApiResponse<SetSystemPromptResponse>> {
+    return api<SetSystemPromptResponse>('/system-prompt', {
+      method: 'POST',
+      body: { prompt },
     })
   },
 }
@@ -484,8 +555,10 @@ export const discordBotApi = {
   channels: channelApi,
   userGuilds: userGuildApi,
   tokens: tokenApi,
+  systemPrompt: systemPromptApi,
   // New optimized operations
   discord: discordOpsApi,
+  leaderboard: leaderboardApi,
 }
 
 export default discordBotApi

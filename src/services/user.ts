@@ -35,6 +35,14 @@ export class UserService extends Context.Tag('UserService')<
     ) => Effect.Effect<User, UserServiceError | UserRepositoryError>
 
     /**
+     * Business logic: Deduct message credits from user if they have enough
+     */
+    deductMessageCredits: (
+      userId: bigint,
+      creditCost: number
+    ) => Effect.Effect<User, UserServiceError | UserRepositoryError>
+
+    /**
      * Simple delegations to repository (you could expose these directly)
      */
     getUser: (userId: bigint) => Effect.Effect<User | null, UserRepositoryError>
@@ -84,6 +92,32 @@ const make = Effect.gen(function* () {
         const updatedUser = yield* userRepo.update(userId, {
           messageCredits: user.messageCredits + BigInt(bonusAmount),
           lastVotedAt: new Date().toISOString(),
+        })
+
+        return updatedUser
+      }),
+
+    deductMessageCredits: (userId: bigint, creditCost: number) =>
+      Effect.gen(function* () {
+        const user = yield* userRepo.findById(userId)
+
+        if (!user) {
+          return yield* Effect.fail(
+            new UserServiceError({ message: `User ${userId} not found` })
+          )
+        }
+
+        const creditCostBigInt = BigInt(creditCost)
+        if (user.messageCredits < creditCostBigInt) {
+          return yield* Effect.fail(
+            new UserServiceError({
+              message: `Insufficient credits. User ${userId} has ${user.messageCredits} credits but needs ${creditCost}`,
+            })
+          )
+        }
+
+        const updatedUser = yield* userRepo.update(userId, {
+          messageCredits: user.messageCredits - creditCostBigInt,
         })
 
         return updatedUser

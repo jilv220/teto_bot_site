@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { Effect } from 'effect'
 import { z } from 'zod/v4'
 import type { SerializedGuild } from '../repositories/guild'
+import type { SerializedUserGuild } from '../repositories/userGuild'
 import { GuildService, GuildServiceLive } from '../services'
 import { serializeBigInt } from '../utils/bigint'
 
@@ -14,6 +15,11 @@ export const CreateGuildSchema = z.object({
 export const UpdateGuildSchema = z.object({
   // Guilds typically don't have many updatable fields in Discord bots
   // but we can add any custom fields you might want to update
+})
+
+export const LeaderboardQuerySchema = z.object({
+  guildId: guildIdSchema,
+  limit: z.coerce.number().min(1).max(100).default(10),
 })
 
 export const getGuildsEffect = Effect.gen(function* () {
@@ -107,6 +113,31 @@ export const updateGuildEffect = (
     )
   )
 
+export const getIntimacyLeaderboardEffect = (guildId: bigint, limit?: number) =>
+  Effect.gen(function* () {
+    const guildService = yield* GuildService
+    const leaderboard = yield* guildService.getIntimacyLeaderboard(
+      guildId,
+      limit
+    )
+    const serializedLeaderboard: SerializedUserGuild[] =
+      serializeBigInt(leaderboard)
+
+    return {
+      data: {
+        leaderboard: serializedLeaderboard,
+        guildId: guildId.toString(),
+        limit: limit || 10,
+      },
+    }
+  }).pipe(
+    Effect.catchAll(() =>
+      Effect.succeed({
+        error: { code: 500, message: 'Failed to fetch intimacy leaderboard' },
+      })
+    )
+  )
+
 export const deleteGuildEffect = (guildId: bigint) =>
   Effect.gen(function* () {
     const guildService = yield* GuildService
@@ -170,6 +201,16 @@ export const updateGuild = createServerFn({ method: 'POST' })
   .handler(async ({ data: { guildId, updateData } }) => {
     return await Effect.runPromise(
       updateGuildEffect(guildId, updateData).pipe(
+        Effect.provide(GuildServiceLive)
+      )
+    )
+  })
+
+export const getIntimacyLeaderboard = createServerFn()
+  .validator((data: unknown) => LeaderboardQuerySchema.parse(data))
+  .handler(async ({ data: { guildId, limit } }) => {
+    return await Effect.runPromise(
+      getIntimacyLeaderboardEffect(guildId, limit).pipe(
         Effect.provide(GuildServiceLive)
       )
     )

@@ -13,5 +13,6 @@ export const appConfig = Effect.gen(function* () {
     redisUrl: yield* Config.string('REDIS_URL'),
     voteCreditBonus: 30,
     dailyCreditRefillCap: 30,
+    messageCreditCost: 1,
   }
 })

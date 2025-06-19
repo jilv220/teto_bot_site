@@ -6,6 +6,12 @@ import {
   GuildRepositoryLive,
   type NewGuild,
 } from '../repositories/guild'
+import {
+  type UserGuild,
+  UserGuildRepository,
+  type UserGuildRepositoryError,
+  UserGuildRepositoryLive,
+} from '../repositories/userGuild'
 import { DatabaseError, DatabaseLive } from './database'
 
 export class GuildServiceError extends DatabaseError {}
@@ -24,6 +30,17 @@ export class GuildService extends Context.Tag('GuildService')<
     getOrCreateGuild: (
       guildId: bigint
     ) => Effect.Effect<Guild, GuildServiceError | GuildRepositoryError>
+
+    /**
+     * Gets the intimacy leaderboard for a guild
+     */
+    getIntimacyLeaderboard: (
+      guildId: bigint,
+      limit?: number
+    ) => Effect.Effect<
+      UserGuild[],
+      GuildServiceError | UserGuildRepositoryError
+    >
 
     /**
      * Simple delegations to repository
@@ -46,6 +63,7 @@ export class GuildService extends Context.Tag('GuildService')<
 
 const make = Effect.gen(function* () {
   const guildRepo = yield* GuildRepository
+  const userGuildRepo = yield* UserGuildRepository
 
   return GuildService.of({
     getOrCreateGuild: (guildId: bigint) =>
@@ -63,6 +81,9 @@ const make = Effect.gen(function* () {
         const createdGuild = yield* guildRepo.create(newGuildData)
         return createdGuild
       }),
+
+    getIntimacyLeaderboard: (guildId: bigint, limit?: number) =>
+      userGuildRepo.findIntimacyLeaderboard(guildId, limit),
 
     getGuild: (guildId: bigint) => guildRepo.findById(guildId),
     getGuildByUuid: (id: string) => guildRepo.findByUuid(id),
@@ -96,5 +117,6 @@ const make = Effect.gen(function* () {
 
 export const GuildServiceLive = Layer.effect(GuildService, make).pipe(
   Layer.provide(GuildRepositoryLive),
+  Layer.provide(UserGuildRepositoryLive),
   Layer.provide(DatabaseLive)
 )

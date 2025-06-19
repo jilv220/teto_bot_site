@@ -14,6 +14,7 @@ import discordBotApi, {
   type TokenResponse,
   type EnsureUserGuildExistsResponse,
   type RecordUserMessageResponse,
+  type LeaderboardResponse,
 } from './api'
 
 // Example usage of the Discord Bot API Client
@@ -444,6 +445,79 @@ async function handleUserJoinGuild(userId: string, guildId: string) {
   }
 }
 
+/**
+ * Example: Get Intimacy Leaderboard for a Guild
+ */
+async function exampleLeaderboardOperations() {
+  try {
+    console.log('\n=== Leaderboard Operations ===')
+
+    const guildId = '123456789012345678'
+
+    // Get top 10 members by intimacy
+    const leaderboardResponse =
+      await discordBotApi.leaderboard.getIntimacyLeaderboard({
+        guildId,
+        limit: 10,
+      })
+
+    if (!isSuccessResponse<LeaderboardResponse>(leaderboardResponse)) {
+      console.error(
+        'Failed to get leaderboard:',
+        getErrorMessage(leaderboardResponse)
+      )
+      return
+    }
+
+    const {
+      leaderboard,
+      guildId: returnedGuildId,
+      limit,
+    } = leaderboardResponse.data
+
+    console.log(
+      `\n🏆 Intimacy Leaderboard for Guild ${returnedGuildId} (Top ${limit}):`
+    )
+
+    if (leaderboard.length === 0) {
+      console.log('No users found in this guild.')
+      return
+    }
+
+    leaderboard.forEach((entry, index) => {
+      const rank = index + 1
+      const medal =
+        rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '  '
+      console.log(
+        `${medal} ${rank.toString().padStart(2)}. User ${entry.userId.substring(0, 8)}... ` +
+          `Intimacy: ${entry.intimacy.toString().padStart(3)} ` +
+          `Daily Messages: ${entry.dailyMessageCount.padStart(3)} ` +
+          `Last Message: ${entry.lastMessageAt ? new Date(entry.lastMessageAt).toLocaleDateString() : 'Never'}`
+      )
+    })
+
+    // Get a smaller leaderboard (top 3)
+    console.log('\n--- Getting Top 3 ---')
+    const top3Response = await discordBotApi.leaderboard.getIntimacyLeaderboard(
+      {
+        guildId,
+        limit: 3,
+      }
+    )
+
+    if (isSuccessResponse<LeaderboardResponse>(top3Response)) {
+      console.log(
+        `Top 3 users have intimacy levels: ${top3Response.data.leaderboard.map((u) => u.intimacy).join(', ')}`
+      )
+    }
+  } catch (error) {
+    console.error(
+      'Error in leaderboard operations:',
+      error instanceof Error ? error.message : String(error)
+    )
+  }
+}
+
 // Export examples for use
 export {
   exampleUserOperations,
@@ -451,6 +525,7 @@ export {
   exampleChannelOperations,
   exampleUserGuildOperations,
   exampleTokenOperations,
+  exampleLeaderboardOperations,
   handleDiscordMessage,
   handleDiscordMessageOptimized,
   handleUserJoinGuild,

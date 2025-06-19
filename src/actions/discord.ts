@@ -11,15 +11,14 @@ import {
   UserService,
   UserServiceLive,
 } from '../services'
+import { appConfig } from '../services/config'
 import { serializeBigInt } from '../utils/bigint'
 
 // Schemas
 export const RecordUserMessageSchema = z.object({
   userId: z.string(),
   guildId: z.string(),
-  messageLength: z.number().optional(),
   intimacyIncrement: z.number().default(1),
-  role: z.enum(['user', 'admin']).default('user'),
 })
 
 export const EnsureUserGuildExistsSchema = z.object({
@@ -36,6 +35,7 @@ export const recordUserMessageEffect = (
     const userService = yield* UserService
     const userGuildService = yield* UserGuildService
     const guildService = yield* GuildService
+    const config = yield* appConfig
 
     const userId = BigInt(params.userId)
     const guildId = BigInt(params.guildId)
@@ -52,7 +52,14 @@ export const recordUserMessageEffect = (
       guildId
     )
 
-    // Record the message activity
+    // ATOMICALLY: Deduct credits first, then update metrics
+    // This ensures we don't update metrics if the user doesn't have enough credits
+    const updatedUser = yield* userService.deductMessageCredits(
+      userId,
+      config.messageCreditCost
+    )
+
+    // Record the message activity (only if credit deduction succeeded)
     const updatedUserGuild = yield* userGuildService.updateUserGuild(
       userId,
       guildId,
@@ -63,7 +70,7 @@ export const recordUserMessageEffect = (
       }
     )
 
-    const serializedUser: SerializedUser = serializeBigInt(user)
+    const serializedUser: SerializedUser = serializeBigInt(updatedUser)
     const serializedUserGuild: SerializedUserGuild =
       serializeBigInt(updatedUserGuild)
 
@@ -78,6 +85,17 @@ export const recordUserMessageEffect = (
   }).pipe(
     Effect.catchAll((error) => {
       console.error('recordUserMessage error:', error)
+
+      // Handle insufficient credits specifically
+      if (error.message?.includes('Insufficient credits')) {
+        return Effect.succeed({
+          error: {
+            code: 402, // Payment Required
+            message: error.message,
+          },
+        })
+      }
+
       return Effect.succeed({
         error: {
           code: 500,

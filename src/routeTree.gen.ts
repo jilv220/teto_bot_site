@@ -16,7 +16,9 @@ import { ServerRoute as ApiWebhookServerRouteImport } from './routes/api/webhook
 import { ServerRoute as ApiUsersServerRouteImport } from './routes/api/users'
 import { ServerRoute as ApiUserGuildsServerRouteImport } from './routes/api/user-guilds'
 import { ServerRoute as ApiTokensServerRouteImport } from './routes/api/tokens'
+import { ServerRoute as ApiSystemPromptServerRouteImport } from './routes/api/system-prompt'
 import { ServerRoute as ApiRecordUserMessageServerRouteImport } from './routes/api/record-user-message'
+import { ServerRoute as ApiLeaderboardServerRouteImport } from './routes/api/leaderboard'
 import { ServerRoute as ApiGuildsServerRouteImport } from './routes/api/guilds'
 import { ServerRoute as ApiEnsureUserGuildExistsServerRouteImport } from './routes/api/ensure-user-guild-exists'
 import { ServerRoute as ApiChannelsServerRouteImport } from './routes/api/channels'
@@ -51,12 +53,22 @@ const ApiTokensServerRoute = ApiTokensServerRouteImport.update({
   path: '/api/tokens',
   getParentRoute: () => rootServerRouteImport,
 } as any)
+const ApiSystemPromptServerRoute = ApiSystemPromptServerRouteImport.update({
+  id: '/api/system-prompt',
+  path: '/api/system-prompt',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
 const ApiRecordUserMessageServerRoute =
   ApiRecordUserMessageServerRouteImport.update({
     id: '/api/record-user-message',
     path: '/api/record-user-message',
     getParentRoute: () => rootServerRouteImport,
   } as any)
+const ApiLeaderboardServerRoute = ApiLeaderboardServerRouteImport.update({
+  id: '/api/leaderboard',
+  path: '/api/leaderboard',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
 const ApiGuildsServerRoute = ApiGuildsServerRouteImport.update({
   id: '/api/guilds',
   path: '/api/guilds',
@@ -115,7 +127,9 @@ export interface FileServerRoutesByFullPath {
   '/api/channels': typeof ApiChannelsServerRouteWithChildren
   '/api/ensure-user-guild-exists': typeof ApiEnsureUserGuildExistsServerRoute
   '/api/guilds': typeof ApiGuildsServerRouteWithChildren
+  '/api/leaderboard': typeof ApiLeaderboardServerRoute
   '/api/record-user-message': typeof ApiRecordUserMessageServerRoute
+  '/api/system-prompt': typeof ApiSystemPromptServerRoute
   '/api/tokens': typeof ApiTokensServerRoute
   '/api/user-guilds': typeof ApiUserGuildsServerRoute
   '/api/users': typeof ApiUsersServerRouteWithChildren
@@ -128,7 +142,9 @@ export interface FileServerRoutesByTo {
   '/api/channels': typeof ApiChannelsServerRouteWithChildren
   '/api/ensure-user-guild-exists': typeof ApiEnsureUserGuildExistsServerRoute
   '/api/guilds': typeof ApiGuildsServerRouteWithChildren
+  '/api/leaderboard': typeof ApiLeaderboardServerRoute
   '/api/record-user-message': typeof ApiRecordUserMessageServerRoute
+  '/api/system-prompt': typeof ApiSystemPromptServerRoute
   '/api/tokens': typeof ApiTokensServerRoute
   '/api/user-guilds': typeof ApiUserGuildsServerRoute
   '/api/users': typeof ApiUsersServerRouteWithChildren
@@ -142,7 +158,9 @@ export interface FileServerRoutesById {
   '/api/channels': typeof ApiChannelsServerRouteWithChildren
   '/api/ensure-user-guild-exists': typeof ApiEnsureUserGuildExistsServerRoute
   '/api/guilds': typeof ApiGuildsServerRouteWithChildren
+  '/api/leaderboard': typeof ApiLeaderboardServerRoute
   '/api/record-user-message': typeof ApiRecordUserMessageServerRoute
+  '/api/system-prompt': typeof ApiSystemPromptServerRoute
   '/api/tokens': typeof ApiTokensServerRoute
   '/api/user-guilds': typeof ApiUserGuildsServerRoute
   '/api/users': typeof ApiUsersServerRouteWithChildren
@@ -157,7 +175,9 @@ export interface FileServerRouteTypes {
     | '/api/channels'
     | '/api/ensure-user-guild-exists'
     | '/api/guilds'
+    | '/api/leaderboard'
     | '/api/record-user-message'
+    | '/api/system-prompt'
     | '/api/tokens'
     | '/api/user-guilds'
     | '/api/users'
@@ -170,7 +190,9 @@ export interface FileServerRouteTypes {
     | '/api/channels'
     | '/api/ensure-user-guild-exists'
     | '/api/guilds'
+    | '/api/leaderboard'
     | '/api/record-user-message'
+    | '/api/system-prompt'
     | '/api/tokens'
     | '/api/user-guilds'
     | '/api/users'
@@ -183,7 +205,9 @@ export interface FileServerRouteTypes {
     | '/api/channels'
     | '/api/ensure-user-guild-exists'
     | '/api/guilds'
+    | '/api/leaderboard'
     | '/api/record-user-message'
+    | '/api/system-prompt'
     | '/api/tokens'
     | '/api/user-guilds'
     | '/api/users'
@@ -197,7 +221,9 @@ export interface RootServerRouteChildren {
   ApiChannelsServerRoute: typeof ApiChannelsServerRouteWithChildren
   ApiEnsureUserGuildExistsServerRoute: typeof ApiEnsureUserGuildExistsServerRoute
   ApiGuildsServerRoute: typeof ApiGuildsServerRouteWithChildren
+  ApiLeaderboardServerRoute: typeof ApiLeaderboardServerRoute
   ApiRecordUserMessageServerRoute: typeof ApiRecordUserMessageServerRoute
+  ApiSystemPromptServerRoute: typeof ApiSystemPromptServerRoute
   ApiTokensServerRoute: typeof ApiTokensServerRoute
   ApiUserGuildsServerRoute: typeof ApiUserGuildsServerRoute
   ApiUsersServerRoute: typeof ApiUsersServerRouteWithChildren
@@ -245,11 +271,25 @@ declare module '@tanstack/react-start/server' {
       preLoaderRoute: typeof ApiTokensServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
+    '/api/system-prompt': {
+      id: '/api/system-prompt'
+      path: '/api/system-prompt'
+      fullPath: '/api/system-prompt'
+      preLoaderRoute: typeof ApiSystemPromptServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
     '/api/record-user-message': {
       id: '/api/record-user-message'
       path: '/api/record-user-message'
       fullPath: '/api/record-user-message'
       preLoaderRoute: typeof ApiRecordUserMessageServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
+    '/api/leaderboard': {
+      id: '/api/leaderboard'
+      path: '/api/leaderboard'
+      fullPath: '/api/leaderboard'
+      preLoaderRoute: typeof ApiLeaderboardServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
     '/api/guilds': {
@@ -342,7 +382,9 @@ const rootServerRouteChildren: RootServerRouteChildren = {
   ApiChannelsServerRoute: ApiChannelsServerRouteWithChildren,
   ApiEnsureUserGuildExistsServerRoute: ApiEnsureUserGuildExistsServerRoute,
   ApiGuildsServerRoute: ApiGuildsServerRouteWithChildren,
+  ApiLeaderboardServerRoute: ApiLeaderboardServerRoute,
   ApiRecordUserMessageServerRoute: ApiRecordUserMessageServerRoute,
+  ApiSystemPromptServerRoute: ApiSystemPromptServerRoute,
   ApiTokensServerRoute: ApiTokensServerRoute,
   ApiUserGuildsServerRoute: ApiUserGuildsServerRoute,
   ApiUsersServerRoute: ApiUsersServerRouteWithChildren,
