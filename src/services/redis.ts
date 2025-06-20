@@ -30,12 +30,34 @@ export class RedisService extends Effect.Service<RedisService>()(
           yield* Effect.promise(() => redis.quit())
         })
 
+      // Generic Redis operations
+      const get = (key: string) => Effect.promise(() => redis.get(key))
+
+      const set = (key: string, value: string) =>
+        Effect.promise(() => redis.set(key, value))
+
+      const del = (key: string) => Effect.promise(() => redis.del(key))
+
+      const exists = (key: string) => Effect.promise(() => redis.exists(key))
+
+      const keys = (pattern: string) =>
+        Effect.promise(() => redis.keys(pattern))
+
+      const mget = (...keys: string[]) =>
+        Effect.promise(() => redis.mget(...keys))
+
       // Add finalizer for cleanup
       yield* Effect.addFinalizer(() => close())
 
       return {
         getSystemPrompt,
         setSystemPrompt,
+        get,
+        set,
+        del,
+        exists,
+        keys,
+        mget,
         close,
       } as const
     }),

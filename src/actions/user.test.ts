@@ -3,7 +3,7 @@ import { Effect } from 'effect'
 import { UserServiceMock } from '../services'
 import { createUserEffect, getUsersEffect } from './user'
 
-describe('User Tasks', () => {
+describe('User Actions', () => {
   describe('createUserEffect', () => {
     it('should create a new user successfully', async () => {
       const result = await Effect.runPromise(

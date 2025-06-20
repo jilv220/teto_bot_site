@@ -193,6 +193,43 @@ export interface SetSystemPromptResponse {
   message: string
 }
 
+// Lyrics Types
+export interface Lyrics {
+  artist: string
+  title: string
+  lyrics: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateLyricsRequest {
+  artist: string
+  title: string
+  lyrics: string
+}
+
+export interface UpdateLyricsRequest {
+  lyrics: string
+}
+
+export interface LyricsResponse {
+  data: {
+    lyrics: Lyrics
+  }
+}
+
+export interface LyricsListResponse {
+  data: {
+    lyrics: Lyrics[]
+  }
+}
+
+export interface DeleteLyricsResponse {
+  data: {
+    message: string
+  }
+}
+
 // Error Types
 export interface ApiError {
   error: {
@@ -433,6 +470,88 @@ export const systemPromptApi = {
   },
 }
 
+// Lyrics API
+export const lyricsApi = {
+  /**
+   * Get all lyrics
+   */
+  async getAllLyrics(): Promise<ApiResponse<LyricsListResponse>> {
+    return api<LyricsListResponse>('/lyrics', {
+      method: 'GET',
+    })
+  },
+
+  /**
+   * Create new lyrics
+   */
+  async createLyrics(
+    lyricsData: CreateLyricsRequest
+  ): Promise<ApiResponse<LyricsResponse>> {
+    return api<LyricsResponse>('/lyrics', {
+      method: 'POST',
+      body: lyricsData,
+    })
+  },
+
+  /**
+   * Get lyrics by artist
+   */
+  async getLyricsByArtist(
+    artist: string
+  ): Promise<ApiResponse<LyricsListResponse>> {
+    return api<LyricsListResponse>(`/lyrics/${encodeURIComponent(artist)}`, {
+      method: 'GET',
+    })
+  },
+
+  /**
+   * Get specific lyrics by artist and title
+   */
+  async getLyrics(
+    artist: string,
+    title: string
+  ): Promise<ApiResponse<LyricsResponse>> {
+    return api<LyricsResponse>(
+      `/lyrics/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`,
+      {
+        method: 'GET',
+      }
+    )
+  },
+
+  /**
+   * Update lyrics by artist and title
+   */
+  async updateLyrics(
+    artist: string,
+    title: string,
+    updates: UpdateLyricsRequest
+  ): Promise<ApiResponse<LyricsResponse>> {
+    return api<LyricsResponse>(
+      `/lyrics/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`,
+      {
+        method: 'PUT',
+        body: updates,
+      }
+    )
+  },
+
+  /**
+   * Delete lyrics by artist and title
+   */
+  async deleteLyrics(
+    artist: string,
+    title: string
+  ): Promise<ApiResponse<DeleteLyricsResponse>> {
+    return api<DeleteLyricsResponse>(
+      `/lyrics/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`,
+      {
+        method: 'DELETE',
+      }
+    )
+  },
+}
+
 // Discord Operations Types (Optimized endpoints)
 export interface EnsureUserGuildExistsRequest {
   userId: string
@@ -556,6 +675,7 @@ export const discordBotApi = {
   userGuilds: userGuildApi,
   tokens: tokenApi,
   systemPrompt: systemPromptApi,
+  lyrics: lyricsApi,
   // New optimized operations
   discord: discordOpsApi,
   leaderboard: leaderboardApi,

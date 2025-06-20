@@ -1,6 +1,7 @@
 export * from './config'
 export * from './database'
 export * from './guild'
+export * from './lyrics'
 export * from './user'
 export * from './userGuild'
 export * from './channel'

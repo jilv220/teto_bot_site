@@ -18,13 +18,16 @@ import { ServerRoute as ApiUserGuildsServerRouteImport } from './routes/api/user
 import { ServerRoute as ApiTokensServerRouteImport } from './routes/api/tokens'
 import { ServerRoute as ApiSystemPromptServerRouteImport } from './routes/api/system-prompt'
 import { ServerRoute as ApiRecordUserMessageServerRouteImport } from './routes/api/record-user-message'
+import { ServerRoute as ApiLyricsServerRouteImport } from './routes/api/lyrics'
 import { ServerRoute as ApiLeaderboardServerRouteImport } from './routes/api/leaderboard'
 import { ServerRoute as ApiGuildsServerRouteImport } from './routes/api/guilds'
 import { ServerRoute as ApiEnsureUserGuildExistsServerRouteImport } from './routes/api/ensure-user-guild-exists'
 import { ServerRoute as ApiChannelsServerRouteImport } from './routes/api/channels'
 import { ServerRoute as ApiUsersUserIdServerRouteImport } from './routes/api/users/$userId'
+import { ServerRoute as ApiLyricsArtistServerRouteImport } from './routes/api/lyrics/$artist'
 import { ServerRoute as ApiGuildsGuildIdServerRouteImport } from './routes/api/guilds/$guildId'
 import { ServerRoute as ApiChannelsChannelIdServerRouteImport } from './routes/api/channels/$channelId'
+import { ServerRoute as ApiLyricsArtistTitleServerRouteImport } from './routes/api/lyrics/$artist/$title'
 
 const rootServerRouteImport = createServerRootRoute()
 
@@ -64,6 +67,11 @@ const ApiRecordUserMessageServerRoute =
     path: '/api/record-user-message',
     getParentRoute: () => rootServerRouteImport,
   } as any)
+const ApiLyricsServerRoute = ApiLyricsServerRouteImport.update({
+  id: '/api/lyrics',
+  path: '/api/lyrics',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
 const ApiLeaderboardServerRoute = ApiLeaderboardServerRouteImport.update({
   id: '/api/leaderboard',
   path: '/api/leaderboard',
@@ -90,6 +98,11 @@ const ApiUsersUserIdServerRoute = ApiUsersUserIdServerRouteImport.update({
   path: '/$userId',
   getParentRoute: () => ApiUsersServerRoute,
 } as any)
+const ApiLyricsArtistServerRoute = ApiLyricsArtistServerRouteImport.update({
+  id: '/$artist',
+  path: '/$artist',
+  getParentRoute: () => ApiLyricsServerRoute,
+} as any)
 const ApiGuildsGuildIdServerRoute = ApiGuildsGuildIdServerRouteImport.update({
   id: '/$guildId',
   path: '/$guildId',
@@ -100,6 +113,12 @@ const ApiChannelsChannelIdServerRoute =
     id: '/$channelId',
     path: '/$channelId',
     getParentRoute: () => ApiChannelsServerRoute,
+  } as any)
+const ApiLyricsArtistTitleServerRoute =
+  ApiLyricsArtistTitleServerRouteImport.update({
+    id: '/$title',
+    path: '/$title',
+    getParentRoute: () => ApiLyricsArtistServerRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -128,6 +147,7 @@ export interface FileServerRoutesByFullPath {
   '/api/ensure-user-guild-exists': typeof ApiEnsureUserGuildExistsServerRoute
   '/api/guilds': typeof ApiGuildsServerRouteWithChildren
   '/api/leaderboard': typeof ApiLeaderboardServerRoute
+  '/api/lyrics': typeof ApiLyricsServerRouteWithChildren
   '/api/record-user-message': typeof ApiRecordUserMessageServerRoute
   '/api/system-prompt': typeof ApiSystemPromptServerRoute
   '/api/tokens': typeof ApiTokensServerRoute
@@ -136,13 +156,16 @@ export interface FileServerRoutesByFullPath {
   '/api/webhook': typeof ApiWebhookServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
+  '/api/lyrics/$artist': typeof ApiLyricsArtistServerRouteWithChildren
   '/api/users/$userId': typeof ApiUsersUserIdServerRoute
+  '/api/lyrics/$artist/$title': typeof ApiLyricsArtistTitleServerRoute
 }
 export interface FileServerRoutesByTo {
   '/api/channels': typeof ApiChannelsServerRouteWithChildren
   '/api/ensure-user-guild-exists': typeof ApiEnsureUserGuildExistsServerRoute
   '/api/guilds': typeof ApiGuildsServerRouteWithChildren
   '/api/leaderboard': typeof ApiLeaderboardServerRoute
+  '/api/lyrics': typeof ApiLyricsServerRouteWithChildren
   '/api/record-user-message': typeof ApiRecordUserMessageServerRoute
   '/api/system-prompt': typeof ApiSystemPromptServerRoute
   '/api/tokens': typeof ApiTokensServerRoute
@@ -151,7 +174,9 @@ export interface FileServerRoutesByTo {
   '/api/webhook': typeof ApiWebhookServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
+  '/api/lyrics/$artist': typeof ApiLyricsArtistServerRouteWithChildren
   '/api/users/$userId': typeof ApiUsersUserIdServerRoute
+  '/api/lyrics/$artist/$title': typeof ApiLyricsArtistTitleServerRoute
 }
 export interface FileServerRoutesById {
   __root__: typeof rootServerRouteImport
@@ -159,6 +184,7 @@ export interface FileServerRoutesById {
   '/api/ensure-user-guild-exists': typeof ApiEnsureUserGuildExistsServerRoute
   '/api/guilds': typeof ApiGuildsServerRouteWithChildren
   '/api/leaderboard': typeof ApiLeaderboardServerRoute
+  '/api/lyrics': typeof ApiLyricsServerRouteWithChildren
   '/api/record-user-message': typeof ApiRecordUserMessageServerRoute
   '/api/system-prompt': typeof ApiSystemPromptServerRoute
   '/api/tokens': typeof ApiTokensServerRoute
@@ -167,7 +193,9 @@ export interface FileServerRoutesById {
   '/api/webhook': typeof ApiWebhookServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
+  '/api/lyrics/$artist': typeof ApiLyricsArtistServerRouteWithChildren
   '/api/users/$userId': typeof ApiUsersUserIdServerRoute
+  '/api/lyrics/$artist/$title': typeof ApiLyricsArtistTitleServerRoute
 }
 export interface FileServerRouteTypes {
   fileServerRoutesByFullPath: FileServerRoutesByFullPath
@@ -176,6 +204,7 @@ export interface FileServerRouteTypes {
     | '/api/ensure-user-guild-exists'
     | '/api/guilds'
     | '/api/leaderboard'
+    | '/api/lyrics'
     | '/api/record-user-message'
     | '/api/system-prompt'
     | '/api/tokens'
@@ -184,13 +213,16 @@ export interface FileServerRouteTypes {
     | '/api/webhook'
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
+    | '/api/lyrics/$artist'
     | '/api/users/$userId'
+    | '/api/lyrics/$artist/$title'
   fileServerRoutesByTo: FileServerRoutesByTo
   to:
     | '/api/channels'
     | '/api/ensure-user-guild-exists'
     | '/api/guilds'
     | '/api/leaderboard'
+    | '/api/lyrics'
     | '/api/record-user-message'
     | '/api/system-prompt'
     | '/api/tokens'
@@ -199,13 +231,16 @@ export interface FileServerRouteTypes {
     | '/api/webhook'
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
+    | '/api/lyrics/$artist'
     | '/api/users/$userId'
+    | '/api/lyrics/$artist/$title'
   id:
     | '__root__'
     | '/api/channels'
     | '/api/ensure-user-guild-exists'
     | '/api/guilds'
     | '/api/leaderboard'
+    | '/api/lyrics'
     | '/api/record-user-message'
     | '/api/system-prompt'
     | '/api/tokens'
@@ -214,7 +249,9 @@ export interface FileServerRouteTypes {
     | '/api/webhook'
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
+    | '/api/lyrics/$artist'
     | '/api/users/$userId'
+    | '/api/lyrics/$artist/$title'
   fileServerRoutesById: FileServerRoutesById
 }
 export interface RootServerRouteChildren {
@@ -222,6 +259,7 @@ export interface RootServerRouteChildren {
   ApiEnsureUserGuildExistsServerRoute: typeof ApiEnsureUserGuildExistsServerRoute
   ApiGuildsServerRoute: typeof ApiGuildsServerRouteWithChildren
   ApiLeaderboardServerRoute: typeof ApiLeaderboardServerRoute
+  ApiLyricsServerRoute: typeof ApiLyricsServerRouteWithChildren
   ApiRecordUserMessageServerRoute: typeof ApiRecordUserMessageServerRoute
   ApiSystemPromptServerRoute: typeof ApiSystemPromptServerRoute
   ApiTokensServerRoute: typeof ApiTokensServerRoute
@@ -285,6 +323,13 @@ declare module '@tanstack/react-start/server' {
       preLoaderRoute: typeof ApiRecordUserMessageServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
+    '/api/lyrics': {
+      id: '/api/lyrics'
+      path: '/api/lyrics'
+      fullPath: '/api/lyrics'
+      preLoaderRoute: typeof ApiLyricsServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
     '/api/leaderboard': {
       id: '/api/leaderboard'
       path: '/api/leaderboard'
@@ -320,6 +365,13 @@ declare module '@tanstack/react-start/server' {
       preLoaderRoute: typeof ApiUsersUserIdServerRouteImport
       parentRoute: typeof ApiUsersServerRoute
     }
+    '/api/lyrics/$artist': {
+      id: '/api/lyrics/$artist'
+      path: '/$artist'
+      fullPath: '/api/lyrics/$artist'
+      preLoaderRoute: typeof ApiLyricsArtistServerRouteImport
+      parentRoute: typeof ApiLyricsServerRoute
+    }
     '/api/guilds/$guildId': {
       id: '/api/guilds/$guildId'
       path: '/$guildId'
@@ -333,6 +385,13 @@ declare module '@tanstack/react-start/server' {
       fullPath: '/api/channels/$channelId'
       preLoaderRoute: typeof ApiChannelsChannelIdServerRouteImport
       parentRoute: typeof ApiChannelsServerRoute
+    }
+    '/api/lyrics/$artist/$title': {
+      id: '/api/lyrics/$artist/$title'
+      path: '/$title'
+      fullPath: '/api/lyrics/$artist/$title'
+      preLoaderRoute: typeof ApiLyricsArtistTitleServerRouteImport
+      parentRoute: typeof ApiLyricsArtistServerRoute
     }
   }
 }
@@ -360,6 +419,31 @@ const ApiGuildsServerRouteWithChildren = ApiGuildsServerRoute._addFileChildren(
   ApiGuildsServerRouteChildren,
 )
 
+interface ApiLyricsArtistServerRouteChildren {
+  ApiLyricsArtistTitleServerRoute: typeof ApiLyricsArtistTitleServerRoute
+}
+
+const ApiLyricsArtistServerRouteChildren: ApiLyricsArtistServerRouteChildren = {
+  ApiLyricsArtistTitleServerRoute: ApiLyricsArtistTitleServerRoute,
+}
+
+const ApiLyricsArtistServerRouteWithChildren =
+  ApiLyricsArtistServerRoute._addFileChildren(
+    ApiLyricsArtistServerRouteChildren,
+  )
+
+interface ApiLyricsServerRouteChildren {
+  ApiLyricsArtistServerRoute: typeof ApiLyricsArtistServerRouteWithChildren
+}
+
+const ApiLyricsServerRouteChildren: ApiLyricsServerRouteChildren = {
+  ApiLyricsArtistServerRoute: ApiLyricsArtistServerRouteWithChildren,
+}
+
+const ApiLyricsServerRouteWithChildren = ApiLyricsServerRoute._addFileChildren(
+  ApiLyricsServerRouteChildren,
+)
+
 interface ApiUsersServerRouteChildren {
   ApiUsersUserIdServerRoute: typeof ApiUsersUserIdServerRoute
 }
@@ -383,6 +467,7 @@ const rootServerRouteChildren: RootServerRouteChildren = {
   ApiEnsureUserGuildExistsServerRoute: ApiEnsureUserGuildExistsServerRoute,
   ApiGuildsServerRoute: ApiGuildsServerRouteWithChildren,
   ApiLeaderboardServerRoute: ApiLeaderboardServerRoute,
+  ApiLyricsServerRoute: ApiLyricsServerRouteWithChildren,
   ApiRecordUserMessageServerRoute: ApiRecordUserMessageServerRoute,
   ApiSystemPromptServerRoute: ApiSystemPromptServerRoute,
   ApiTokensServerRoute: ApiTokensServerRoute,
