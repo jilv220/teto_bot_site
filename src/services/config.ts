@@ -1,8 +1,5 @@
 import { Config, Effect } from 'effect'
 
-const dotenv = await import('dotenv')
-dotenv.config()
-
 export const appConfig = Effect.gen(function* () {
   return {
     port: yield* Config.number('PORT').pipe(Config.withDefault(3000)),

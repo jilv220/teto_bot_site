@@ -10,8 +10,6 @@ export default defineConfig({
     port: 3000,
   },
   plugins: [
-    wasm(),
-    topLevelAwait(),
     tsConfigPaths(),
     tanstackStart({
       target: 'bun',
