@@ -1,3 +1,4 @@
+import { serverOnly } from '@tanstack/react-start'
 import { Context, Effect, Layer } from 'effect'
 import {
   type CreateLyricsInput,
@@ -170,7 +171,10 @@ const make = Effect.gen(function* () {
   })
 })
 
-export const LyricsServiceLive = Layer.effect(LyricsService, make).pipe(
-  Layer.provide(LyricsRepositoryLive),
-  Layer.provide(RedisServiceLive)
+// This kept server code from leaking into client bundle
+export const LyricsServiceLive = serverOnly(() =>
+  Layer.effect(LyricsService, make).pipe(
+    Layer.provide(LyricsRepositoryLive),
+    Layer.provide(RedisServiceLive)
+  )
 )

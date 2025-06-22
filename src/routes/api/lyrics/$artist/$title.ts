@@ -25,7 +25,7 @@ export const ServerRoute = createServerFileRoute(
         getLyricsEffect(
           decodeURIComponent(artist),
           decodeURIComponent(title)
-        ).pipe(Effect.provide(LyricsServiceLive))
+        ).pipe(Effect.provide(LyricsServiceLive()))
       )
     )
 
@@ -49,7 +49,7 @@ export const ServerRoute = createServerFileRoute(
             decodeURIComponent(artist),
             decodeURIComponent(title),
             updates
-          ).pipe(Effect.provide(LyricsServiceLive))
+          ).pipe(Effect.provide(LyricsServiceLive()))
         )
       )
 
@@ -73,7 +73,7 @@ export const ServerRoute = createServerFileRoute(
         deleteLyricsEffect(
           decodeURIComponent(artist),
           decodeURIComponent(title)
-        ).pipe(Effect.provide(LyricsServiceLive))
+        ).pipe(Effect.provide(LyricsServiceLive()))
       )
     )
 

@@ -1,6 +1,7 @@
 import { Effect } from 'effect'
-import Redis from 'ioredis'
 import { appConfig } from './config'
+
+import Redis from 'ioredis'
 
 const LLM_SYS_PROMPT_KEY = 'llm_sys_prompt'
 

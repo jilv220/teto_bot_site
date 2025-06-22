@@ -193,7 +193,7 @@ export const deleteLyricsEffect = (artist: string, title: string) =>
 
 export const getAllLyrics = createServerFn().handler(async () => {
   return await Effect.runPromise(
-    Effect.scoped(getAllLyricsEffect.pipe(Effect.provide(LyricsServiceLive)))
+    Effect.scoped(getAllLyricsEffect.pipe(Effect.provide(LyricsServiceLive())))
   )
 })
 
@@ -202,7 +202,7 @@ export const getLyrics = createServerFn()
   .handler(async ({ data: { artist, title } }) => {
     return await Effect.runPromise(
       Effect.scoped(
-        getLyricsEffect(artist, title).pipe(Effect.provide(LyricsServiceLive))
+        getLyricsEffect(artist, title).pipe(Effect.provide(LyricsServiceLive()))
       )
     )
   })
@@ -212,7 +212,9 @@ export const getLyricsByArtist = createServerFn()
   .handler(async ({ data: { artist } }) => {
     return await Effect.runPromise(
       Effect.scoped(
-        getLyricsByArtistEffect(artist).pipe(Effect.provide(LyricsServiceLive))
+        getLyricsByArtistEffect(artist).pipe(
+          Effect.provide(LyricsServiceLive())
+        )
       )
     )
   })
@@ -222,7 +224,7 @@ export const createLyrics = createServerFn({ method: 'POST' })
   .handler(async ({ data: lyricsData }) => {
     return await Effect.runPromise(
       Effect.scoped(
-        createLyricsEffect(lyricsData).pipe(Effect.provide(LyricsServiceLive))
+        createLyricsEffect(lyricsData).pipe(Effect.provide(LyricsServiceLive()))
       )
     )
   })
@@ -242,7 +244,7 @@ export const updateLyrics = createServerFn({ method: 'POST' })
     return await Effect.runPromise(
       Effect.scoped(
         updateLyricsEffect(artist, title, { lyrics }).pipe(
-          Effect.provide(LyricsServiceLive)
+          Effect.provide(LyricsServiceLive())
         )
       )
     )
@@ -254,7 +256,7 @@ export const deleteLyrics = createServerFn({ method: 'POST' })
     return await Effect.runPromise(
       Effect.scoped(
         deleteLyricsEffect(artist, title).pipe(
-          Effect.provide(LyricsServiceLive)
+          Effect.provide(LyricsServiceLive())
         )
       )
     )

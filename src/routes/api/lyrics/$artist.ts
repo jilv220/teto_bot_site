@@ -12,7 +12,7 @@ export const ServerRoute = createServerFileRoute('/api/lyrics/$artist').methods(
       const res = await Effect.runPromise(
         Effect.scoped(
           getLyricsByArtistEffect(decodeURIComponent(artist)).pipe(
-            Effect.provide(LyricsServiceLive)
+            Effect.provide(LyricsServiceLive())
           )
         )
       )

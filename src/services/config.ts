@@ -1,7 +1,6 @@
 import { Config, Effect } from 'effect'
 
-import dotenv from 'dotenv'
-
+const dotenv = await import('dotenv')
 dotenv.config()
 
 export const appConfig = Effect.gen(function* () {
