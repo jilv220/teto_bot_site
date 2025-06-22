@@ -670,6 +670,30 @@ export interface WordOfTheDayResponse {
   date: string
 }
 
+// Word Response Types
+export interface WordResponse {
+  response: string
+  updatedAt: string
+}
+
+export interface UpdateWordResponseRequest {
+  response: string
+}
+
+export interface WordResponseResponse {
+  data: WordResponse
+}
+
+export interface UpdateWordResponseResponse {
+  data: WordResponse
+}
+
+export interface DeleteWordResponseResponse {
+  data: {
+    message: string
+  }
+}
+
 // Word of the Day API
 export const wordOfTheDayApi = {
   /**
@@ -677,6 +701,37 @@ export const wordOfTheDayApi = {
    */
   async getTodaysWord(): Promise<ApiResponse<WordOfTheDayResponse>> {
     return api<WordOfTheDayResponse>('/word-of-the-day')
+  },
+}
+
+// Word Response API
+export const wordResponseApi = {
+  /**
+   * Get the current LLM word response
+   */
+  async getWordResponse(): Promise<ApiResponse<WordResponseResponse>> {
+    return api<WordResponseResponse>('/word-response')
+  },
+
+  /**
+   * Update the LLM word response
+   */
+  async updateWordResponse(
+    updateData: UpdateWordResponseRequest
+  ): Promise<ApiResponse<UpdateWordResponseResponse>> {
+    return api<UpdateWordResponseResponse>('/word-response', {
+      method: 'POST',
+      body: updateData,
+    })
+  },
+
+  /**
+   * Delete the current LLM word response
+   */
+  async deleteWordResponse(): Promise<ApiResponse<DeleteWordResponseResponse>> {
+    return api<DeleteWordResponseResponse>('/word-response', {
+      method: 'DELETE',
+    })
   },
 }
 
@@ -697,6 +752,8 @@ export const discordBotApi = {
   leaderboard: leaderboardApi,
   // Word of the day
   wordOfTheDay: wordOfTheDayApi,
+  // Word response
+  wordResponse: wordResponseApi,
 }
 
 export default discordBotApi

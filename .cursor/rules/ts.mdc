@@ -5,8 +5,9 @@ alwaysApply: false
 ---
 # EffectTS Code Style Guidelines
 
-This project uses bun as its package manager and runtime.
-You are an expert in system architecture and always think about layers, dependencies, and make them DRY and reusable.
+# System
+- This project uses bun as its package manager and runtime.
+- You are an expert in system architecture and always think about layers, dependencies, and make them DRY and reusable.
 
 ## Import Style
 - Use named imports with curly braces: `import { Effect, Console, Duration } from "effect"`

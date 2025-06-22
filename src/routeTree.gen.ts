@@ -12,6 +12,7 @@ import { createServerRootRoute } from '@tanstack/react-start/server'
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { ServerRoute as ApiWordResponseServerRouteImport } from './routes/api/word-response'
 import { ServerRoute as ApiWordOfTheDayServerRouteImport } from './routes/api/word-of-the-day'
 import { ServerRoute as ApiWebhookServerRouteImport } from './routes/api/webhook'
 import { ServerRoute as ApiUsersServerRouteImport } from './routes/api/users'
@@ -36,6 +37,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWordResponseServerRoute = ApiWordResponseServerRouteImport.update({
+  id: '/api/word-response',
+  path: '/api/word-response',
+  getParentRoute: () => rootServerRouteImport,
 } as any)
 const ApiWordOfTheDayServerRoute = ApiWordOfTheDayServerRouteImport.update({
   id: '/api/word-of-the-day',
@@ -161,6 +167,7 @@ export interface FileServerRoutesByFullPath {
   '/api/users': typeof ApiUsersServerRouteWithChildren
   '/api/webhook': typeof ApiWebhookServerRoute
   '/api/word-of-the-day': typeof ApiWordOfTheDayServerRoute
+  '/api/word-response': typeof ApiWordResponseServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
   '/api/lyrics/$artist': typeof ApiLyricsArtistServerRouteWithChildren
@@ -180,6 +187,7 @@ export interface FileServerRoutesByTo {
   '/api/users': typeof ApiUsersServerRouteWithChildren
   '/api/webhook': typeof ApiWebhookServerRoute
   '/api/word-of-the-day': typeof ApiWordOfTheDayServerRoute
+  '/api/word-response': typeof ApiWordResponseServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
   '/api/lyrics/$artist': typeof ApiLyricsArtistServerRouteWithChildren
@@ -200,6 +208,7 @@ export interface FileServerRoutesById {
   '/api/users': typeof ApiUsersServerRouteWithChildren
   '/api/webhook': typeof ApiWebhookServerRoute
   '/api/word-of-the-day': typeof ApiWordOfTheDayServerRoute
+  '/api/word-response': typeof ApiWordResponseServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
   '/api/lyrics/$artist': typeof ApiLyricsArtistServerRouteWithChildren
@@ -221,6 +230,7 @@ export interface FileServerRouteTypes {
     | '/api/users'
     | '/api/webhook'
     | '/api/word-of-the-day'
+    | '/api/word-response'
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
     | '/api/lyrics/$artist'
@@ -240,6 +250,7 @@ export interface FileServerRouteTypes {
     | '/api/users'
     | '/api/webhook'
     | '/api/word-of-the-day'
+    | '/api/word-response'
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
     | '/api/lyrics/$artist'
@@ -259,6 +270,7 @@ export interface FileServerRouteTypes {
     | '/api/users'
     | '/api/webhook'
     | '/api/word-of-the-day'
+    | '/api/word-response'
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
     | '/api/lyrics/$artist'
@@ -279,6 +291,7 @@ export interface RootServerRouteChildren {
   ApiUsersServerRoute: typeof ApiUsersServerRouteWithChildren
   ApiWebhookServerRoute: typeof ApiWebhookServerRoute
   ApiWordOfTheDayServerRoute: typeof ApiWordOfTheDayServerRoute
+  ApiWordResponseServerRoute: typeof ApiWordResponseServerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -294,6 +307,13 @@ declare module '@tanstack/react-router' {
 }
 declare module '@tanstack/react-start/server' {
   interface ServerFileRoutesByPath {
+    '/api/word-response': {
+      id: '/api/word-response'
+      path: '/api/word-response'
+      fullPath: '/api/word-response'
+      preLoaderRoute: typeof ApiWordResponseServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
     '/api/word-of-the-day': {
       id: '/api/word-of-the-day'
       path: '/api/word-of-the-day'
@@ -495,6 +515,7 @@ const rootServerRouteChildren: RootServerRouteChildren = {
   ApiUsersServerRoute: ApiUsersServerRouteWithChildren,
   ApiWebhookServerRoute: ApiWebhookServerRoute,
   ApiWordOfTheDayServerRoute: ApiWordOfTheDayServerRoute,
+  ApiWordResponseServerRoute: ApiWordResponseServerRoute,
 }
 export const serverRouteTree = rootServerRouteImport
   ._addFileChildren(rootServerRouteChildren)
