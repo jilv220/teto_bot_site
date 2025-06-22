@@ -313,7 +313,7 @@ function Dashboard() {
                   }
                   placeholder="Enter the song lyrics..."
                   required
-                  className="min-h-48"
+                  className="min-h-48 max-h-48 overflow-y-auto resize-none"
                 />
               </div>
             </div>

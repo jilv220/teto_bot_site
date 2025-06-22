@@ -18,7 +18,6 @@ import { ServerRoute as ApiWordOfTheDayServerRouteImport } from './routes/api/wo
 import { ServerRoute as ApiWebhookServerRouteImport } from './routes/api/webhook'
 import { ServerRoute as ApiUsersServerRouteImport } from './routes/api/users'
 import { ServerRoute as ApiUserGuildsServerRouteImport } from './routes/api/user-guilds'
-import { ServerRoute as ApiTokensServerRouteImport } from './routes/api/tokens'
 import { ServerRoute as ApiSystemPromptServerRouteImport } from './routes/api/system-prompt'
 import { ServerRoute as ApiRecordUserMessageServerRouteImport } from './routes/api/record-user-message'
 import { ServerRoute as ApiLyricsServerRouteImport } from './routes/api/lyrics'
@@ -67,11 +66,6 @@ const ApiUsersServerRoute = ApiUsersServerRouteImport.update({
 const ApiUserGuildsServerRoute = ApiUserGuildsServerRouteImport.update({
   id: '/api/user-guilds',
   path: '/api/user-guilds',
-  getParentRoute: () => rootServerRouteImport,
-} as any)
-const ApiTokensServerRoute = ApiTokensServerRouteImport.update({
-  id: '/api/tokens',
-  path: '/api/tokens',
   getParentRoute: () => rootServerRouteImport,
 } as any)
 const ApiSystemPromptServerRoute = ApiSystemPromptServerRouteImport.update({
@@ -172,7 +166,6 @@ export interface FileServerRoutesByFullPath {
   '/api/lyrics': typeof ApiLyricsServerRouteWithChildren
   '/api/record-user-message': typeof ApiRecordUserMessageServerRoute
   '/api/system-prompt': typeof ApiSystemPromptServerRoute
-  '/api/tokens': typeof ApiTokensServerRoute
   '/api/user-guilds': typeof ApiUserGuildsServerRoute
   '/api/users': typeof ApiUsersServerRouteWithChildren
   '/api/webhook': typeof ApiWebhookServerRoute
@@ -192,7 +185,6 @@ export interface FileServerRoutesByTo {
   '/api/lyrics': typeof ApiLyricsServerRouteWithChildren
   '/api/record-user-message': typeof ApiRecordUserMessageServerRoute
   '/api/system-prompt': typeof ApiSystemPromptServerRoute
-  '/api/tokens': typeof ApiTokensServerRoute
   '/api/user-guilds': typeof ApiUserGuildsServerRoute
   '/api/users': typeof ApiUsersServerRouteWithChildren
   '/api/webhook': typeof ApiWebhookServerRoute
@@ -213,7 +205,6 @@ export interface FileServerRoutesById {
   '/api/lyrics': typeof ApiLyricsServerRouteWithChildren
   '/api/record-user-message': typeof ApiRecordUserMessageServerRoute
   '/api/system-prompt': typeof ApiSystemPromptServerRoute
-  '/api/tokens': typeof ApiTokensServerRoute
   '/api/user-guilds': typeof ApiUserGuildsServerRoute
   '/api/users': typeof ApiUsersServerRouteWithChildren
   '/api/webhook': typeof ApiWebhookServerRoute
@@ -235,7 +226,6 @@ export interface FileServerRouteTypes {
     | '/api/lyrics'
     | '/api/record-user-message'
     | '/api/system-prompt'
-    | '/api/tokens'
     | '/api/user-guilds'
     | '/api/users'
     | '/api/webhook'
@@ -255,7 +245,6 @@ export interface FileServerRouteTypes {
     | '/api/lyrics'
     | '/api/record-user-message'
     | '/api/system-prompt'
-    | '/api/tokens'
     | '/api/user-guilds'
     | '/api/users'
     | '/api/webhook'
@@ -275,7 +264,6 @@ export interface FileServerRouteTypes {
     | '/api/lyrics'
     | '/api/record-user-message'
     | '/api/system-prompt'
-    | '/api/tokens'
     | '/api/user-guilds'
     | '/api/users'
     | '/api/webhook'
@@ -296,7 +284,6 @@ export interface RootServerRouteChildren {
   ApiLyricsServerRoute: typeof ApiLyricsServerRouteWithChildren
   ApiRecordUserMessageServerRoute: typeof ApiRecordUserMessageServerRoute
   ApiSystemPromptServerRoute: typeof ApiSystemPromptServerRoute
-  ApiTokensServerRoute: typeof ApiTokensServerRoute
   ApiUserGuildsServerRoute: typeof ApiUserGuildsServerRoute
   ApiUsersServerRoute: typeof ApiUsersServerRouteWithChildren
   ApiWebhookServerRoute: typeof ApiWebhookServerRoute
@@ -357,13 +344,6 @@ declare module '@tanstack/react-start/server' {
       path: '/api/user-guilds'
       fullPath: '/api/user-guilds'
       preLoaderRoute: typeof ApiUserGuildsServerRouteImport
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/api/tokens': {
-      id: '/api/tokens'
-      path: '/api/tokens'
-      fullPath: '/api/tokens'
-      preLoaderRoute: typeof ApiTokensServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
     '/api/system-prompt': {
@@ -528,7 +508,6 @@ const rootServerRouteChildren: RootServerRouteChildren = {
   ApiLyricsServerRoute: ApiLyricsServerRouteWithChildren,
   ApiRecordUserMessageServerRoute: ApiRecordUserMessageServerRoute,
   ApiSystemPromptServerRoute: ApiSystemPromptServerRoute,
-  ApiTokensServerRoute: ApiTokensServerRoute,
   ApiUserGuildsServerRoute: ApiUserGuildsServerRoute,
   ApiUsersServerRoute: ApiUsersServerRouteWithChildren,
   ApiWebhookServerRoute: ApiWebhookServerRoute,
