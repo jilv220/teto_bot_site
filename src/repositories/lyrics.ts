@@ -26,8 +26,8 @@ export class LyricsRepository extends Context.Tag('LyricsRepository')<
       artist: string,
       title: string
     ) => Effect.Effect<Lyrics | null, LyricsRepositoryError>
-    findByArtist: (
-      artist: string
+    findByTitle: (
+      title: string
     ) => Effect.Effect<Lyrics[], LyricsRepositoryError>
     findAll: () => Effect.Effect<Lyrics[], LyricsRepositoryError>
     create: (
@@ -55,17 +55,17 @@ const make = Effect.gen(function* () {
         .replace(/\s+/g, '_')
         .replace(/[^a-z0-9_]/g, '')
 
-    return `lyrics:${toSnakeCase(artist)}:${toSnakeCase(title)}`
+    return `lyrics:${toSnakeCase(title)}:${toSnakeCase(artist)}`
   }
 
-  const getSearchPattern = (artist?: string): string => {
+  const getSearchPattern = (title?: string): string => {
     const toSnakeCase = (str: string): string =>
       str
         .toLowerCase()
         .replace(/\s+/g, '_')
         .replace(/[^a-z0-9_]/g, '')
 
-    return artist ? `lyrics:${toSnakeCase(artist)}:*` : 'lyrics:*'
+    return title ? `lyrics:${toSnakeCase(title)}:*` : 'lyrics:*'
   }
 
   return LyricsRepository.of({
@@ -97,16 +97,16 @@ const make = Effect.gen(function* () {
         }
       }),
 
-    findByArtist: (artist: string) =>
+    findByTitle: (title: string) =>
       Effect.gen(function* () {
-        const pattern = getSearchPattern(artist)
+        const pattern = getSearchPattern(title)
 
         const keys = yield* Effect.catchAll(
           redisService.keys(pattern),
           (error) =>
             Effect.fail(
               new LyricsRepositoryError(
-                `Failed to find lyrics keys for artist ${artist}: ${error}`
+                `Failed to find lyrics keys for title ${title}: ${error}`
               )
             )
         )
@@ -118,7 +118,7 @@ const make = Effect.gen(function* () {
           (error) =>
             Effect.fail(
               new LyricsRepositoryError(
-                `Failed to get lyrics for artist ${artist}: ${error}`
+                `Failed to get lyrics for title ${title}: ${error}`
               )
             )
         )

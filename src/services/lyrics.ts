@@ -35,10 +35,10 @@ export class LyricsService extends Context.Tag('LyricsService')<
     >
 
     /**
-     * Get all lyrics by a specific artist
+     * Get all lyrics by a specific title
      */
-    getLyricsByArtist: (
-      artist: string
+    getLyricsByTitle: (
+      title: string
     ) => Effect.Effect<Lyrics[], LyricsServiceError | LyricsRepositoryError>
 
     /**
@@ -93,15 +93,15 @@ const make = Effect.gen(function* () {
         )
       }),
 
-    getLyricsByArtist: (artist: string) =>
+    getLyricsByTitle: (title: string) =>
       Effect.gen(function* () {
-        if (!artist.trim()) {
+        if (!title.trim()) {
           return yield* Effect.fail(
-            new LyricsServiceError('Artist cannot be empty')
+            new LyricsServiceError('Title cannot be empty')
           )
         }
 
-        return yield* lyricsRepo.findByArtist(artist.trim())
+        return yield* lyricsRepo.findByTitle(title.trim())
       }),
 
     getAllLyrics: () => lyricsRepo.findAll(),

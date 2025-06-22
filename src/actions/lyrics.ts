@@ -20,8 +20,8 @@ export const GetLyricsParamsSchema = z.object({
   title: z.string().min(1, 'Title is required'),
 })
 
-export const GetLyricsByArtistParamsSchema = z.object({
-  artist: z.string().min(1, 'Artist is required'),
+export const GetLyricsByTitleParamsSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
 })
 
 export const DeleteLyricsParamsSchema = GetLyricsParamsSchema
@@ -72,10 +72,10 @@ export const getLyricsEffect = (artist: string, title: string) =>
     )
   )
 
-export const getLyricsByArtistEffect = (artist: string) =>
+export const getLyricsByTitleEffect = (title: string) =>
   Effect.gen(function* () {
     const lyricsService = yield* LyricsService
-    const lyrics = yield* lyricsService.getLyricsByArtist(artist)
+    const lyrics = yield* lyricsService.getLyricsByTitle(title)
 
     return {
       data: {
@@ -85,7 +85,7 @@ export const getLyricsByArtistEffect = (artist: string) =>
   }).pipe(
     Effect.catchAll(() =>
       Effect.succeed({
-        error: { code: 500, message: 'Failed to fetch lyrics by artist' },
+        error: { code: 500, message: 'Failed to fetch lyrics by title' },
       })
     )
   )
@@ -207,14 +207,12 @@ export const getLyrics = createServerFn()
     )
   })
 
-export const getLyricsByArtist = createServerFn()
-  .validator((data: unknown) => GetLyricsByArtistParamsSchema.parse(data))
-  .handler(async ({ data: { artist } }) => {
+export const getLyricsByTitle = createServerFn()
+  .validator((data: unknown) => GetLyricsByTitleParamsSchema.parse(data))
+  .handler(async ({ data: { title } }) => {
     return await Effect.runPromise(
       Effect.scoped(
-        getLyricsByArtistEffect(artist).pipe(
-          Effect.provide(LyricsServiceLive())
-        )
+        getLyricsByTitleEffect(title).pipe(Effect.provide(LyricsServiceLive()))
       )
     )
   })

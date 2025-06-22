@@ -26,7 +26,7 @@ import { ServerRoute as ApiGuildsServerRouteImport } from './routes/api/guilds'
 import { ServerRoute as ApiEnsureUserGuildExistsServerRouteImport } from './routes/api/ensure-user-guild-exists'
 import { ServerRoute as ApiChannelsServerRouteImport } from './routes/api/channels'
 import { ServerRoute as ApiUsersUserIdServerRouteImport } from './routes/api/users/$userId'
-import { ServerRoute as ApiLyricsArtistServerRouteImport } from './routes/api/lyrics/$artist'
+import { ServerRoute as ApiLyricsTitleServerRouteImport } from './routes/api/lyrics/$title'
 import { ServerRoute as ApiGuildsGuildIdServerRouteImport } from './routes/api/guilds/$guildId'
 import { ServerRoute as ApiChannelsChannelIdServerRouteImport } from './routes/api/channels/$channelId'
 import { ServerRoute as ApiLyricsArtistTitleServerRouteImport } from './routes/api/lyrics/$artist/$title'
@@ -110,9 +110,9 @@ const ApiUsersUserIdServerRoute = ApiUsersUserIdServerRouteImport.update({
   path: '/$userId',
   getParentRoute: () => ApiUsersServerRoute,
 } as any)
-const ApiLyricsArtistServerRoute = ApiLyricsArtistServerRouteImport.update({
-  id: '/$artist',
-  path: '/$artist',
+const ApiLyricsTitleServerRoute = ApiLyricsTitleServerRouteImport.update({
+  id: '/$title',
+  path: '/$title',
   getParentRoute: () => ApiLyricsServerRoute,
 } as any)
 const ApiGuildsGuildIdServerRoute = ApiGuildsGuildIdServerRouteImport.update({
@@ -128,9 +128,9 @@ const ApiChannelsChannelIdServerRoute =
   } as any)
 const ApiLyricsArtistTitleServerRoute =
   ApiLyricsArtistTitleServerRouteImport.update({
-    id: '/$title',
-    path: '/$title',
-    getParentRoute: () => ApiLyricsArtistServerRoute,
+    id: '/$artist/$title',
+    path: '/$artist/$title',
+    getParentRoute: () => ApiLyricsServerRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -173,7 +173,7 @@ export interface FileServerRoutesByFullPath {
   '/api/word-response': typeof ApiWordResponseServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
-  '/api/lyrics/$artist': typeof ApiLyricsArtistServerRouteWithChildren
+  '/api/lyrics/$title': typeof ApiLyricsTitleServerRoute
   '/api/users/$userId': typeof ApiUsersUserIdServerRoute
   '/api/lyrics/$artist/$title': typeof ApiLyricsArtistTitleServerRoute
 }
@@ -192,7 +192,7 @@ export interface FileServerRoutesByTo {
   '/api/word-response': typeof ApiWordResponseServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
-  '/api/lyrics/$artist': typeof ApiLyricsArtistServerRouteWithChildren
+  '/api/lyrics/$title': typeof ApiLyricsTitleServerRoute
   '/api/users/$userId': typeof ApiUsersUserIdServerRoute
   '/api/lyrics/$artist/$title': typeof ApiLyricsArtistTitleServerRoute
 }
@@ -212,7 +212,7 @@ export interface FileServerRoutesById {
   '/api/word-response': typeof ApiWordResponseServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
-  '/api/lyrics/$artist': typeof ApiLyricsArtistServerRouteWithChildren
+  '/api/lyrics/$title': typeof ApiLyricsTitleServerRoute
   '/api/users/$userId': typeof ApiUsersUserIdServerRoute
   '/api/lyrics/$artist/$title': typeof ApiLyricsArtistTitleServerRoute
 }
@@ -233,7 +233,7 @@ export interface FileServerRouteTypes {
     | '/api/word-response'
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
-    | '/api/lyrics/$artist'
+    | '/api/lyrics/$title'
     | '/api/users/$userId'
     | '/api/lyrics/$artist/$title'
   fileServerRoutesByTo: FileServerRoutesByTo
@@ -252,7 +252,7 @@ export interface FileServerRouteTypes {
     | '/api/word-response'
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
-    | '/api/lyrics/$artist'
+    | '/api/lyrics/$title'
     | '/api/users/$userId'
     | '/api/lyrics/$artist/$title'
   id:
@@ -271,7 +271,7 @@ export interface FileServerRouteTypes {
     | '/api/word-response'
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
-    | '/api/lyrics/$artist'
+    | '/api/lyrics/$title'
     | '/api/users/$userId'
     | '/api/lyrics/$artist/$title'
   fileServerRoutesById: FileServerRoutesById
@@ -402,11 +402,11 @@ declare module '@tanstack/react-start/server' {
       preLoaderRoute: typeof ApiUsersUserIdServerRouteImport
       parentRoute: typeof ApiUsersServerRoute
     }
-    '/api/lyrics/$artist': {
-      id: '/api/lyrics/$artist'
-      path: '/$artist'
-      fullPath: '/api/lyrics/$artist'
-      preLoaderRoute: typeof ApiLyricsArtistServerRouteImport
+    '/api/lyrics/$title': {
+      id: '/api/lyrics/$title'
+      path: '/$title'
+      fullPath: '/api/lyrics/$title'
+      preLoaderRoute: typeof ApiLyricsTitleServerRouteImport
       parentRoute: typeof ApiLyricsServerRoute
     }
     '/api/guilds/$guildId': {
@@ -425,10 +425,10 @@ declare module '@tanstack/react-start/server' {
     }
     '/api/lyrics/$artist/$title': {
       id: '/api/lyrics/$artist/$title'
-      path: '/$title'
+      path: '/$artist/$title'
       fullPath: '/api/lyrics/$artist/$title'
       preLoaderRoute: typeof ApiLyricsArtistTitleServerRouteImport
-      parentRoute: typeof ApiLyricsArtistServerRoute
+      parentRoute: typeof ApiLyricsServerRoute
     }
   }
 }
@@ -456,25 +456,14 @@ const ApiGuildsServerRouteWithChildren = ApiGuildsServerRoute._addFileChildren(
   ApiGuildsServerRouteChildren,
 )
 
-interface ApiLyricsArtistServerRouteChildren {
+interface ApiLyricsServerRouteChildren {
+  ApiLyricsTitleServerRoute: typeof ApiLyricsTitleServerRoute
   ApiLyricsArtistTitleServerRoute: typeof ApiLyricsArtistTitleServerRoute
 }
 
-const ApiLyricsArtistServerRouteChildren: ApiLyricsArtistServerRouteChildren = {
-  ApiLyricsArtistTitleServerRoute: ApiLyricsArtistTitleServerRoute,
-}
-
-const ApiLyricsArtistServerRouteWithChildren =
-  ApiLyricsArtistServerRoute._addFileChildren(
-    ApiLyricsArtistServerRouteChildren,
-  )
-
-interface ApiLyricsServerRouteChildren {
-  ApiLyricsArtistServerRoute: typeof ApiLyricsArtistServerRouteWithChildren
-}
-
 const ApiLyricsServerRouteChildren: ApiLyricsServerRouteChildren = {
-  ApiLyricsArtistServerRoute: ApiLyricsArtistServerRouteWithChildren,
+  ApiLyricsTitleServerRoute: ApiLyricsTitleServerRoute,
+  ApiLyricsArtistTitleServerRoute: ApiLyricsArtistTitleServerRoute,
 }
 
 const ApiLyricsServerRouteWithChildren = ApiLyricsServerRoute._addFileChildren(

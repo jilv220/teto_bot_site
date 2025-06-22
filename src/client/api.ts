@@ -494,12 +494,12 @@ export const lyricsApi = {
   },
 
   /**
-   * Get lyrics by artist
+   * Get lyrics by title
    */
-  async getLyricsByArtist(
-    artist: string
+  async getLyricsByTitle(
+    title: string
   ): Promise<ApiResponse<LyricsListResponse>> {
-    return api<LyricsListResponse>(`/lyrics/${encodeURIComponent(artist)}`, {
+    return api<LyricsListResponse>(`/lyrics/${encodeURIComponent(title)}`, {
       method: 'GET',
     })
   },
