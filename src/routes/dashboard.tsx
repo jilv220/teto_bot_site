@@ -67,8 +67,8 @@ function Dashboard() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingLyrics, setEditingLyrics] = useState<Lyrics | null>(null)
   const [formData, setFormData] = useState({
-    artist: '',
     title: '',
+    artist: '',
     lyrics: '',
   })
 
@@ -91,8 +91,8 @@ function Dashboard() {
         // Create new lyrics
         const result = await createLyricsAction({
           data: {
-            artist: formData.artist,
             title: formData.title,
+            artist: formData.artist,
             lyrics: formData.lyrics,
           },
         })
@@ -122,8 +122,8 @@ function Dashboard() {
   const handleEdit = (item: Lyrics) => {
     setEditingLyrics(item)
     setFormData({
-      artist: item.artist,
       title: item.title,
+      artist: item.artist,
       lyrics: item.lyrics,
     })
     setDialogOpen(true)
@@ -132,8 +132,8 @@ function Dashboard() {
   const handleCreate = () => {
     setEditingLyrics(null)
     setFormData({
-      artist: '',
       title: '',
+      artist: '',
       lyrics: '',
     })
     setDialogOpen(true)
@@ -143,8 +143,8 @@ function Dashboard() {
     setDialogOpen(false)
     setEditingLyrics(null)
     setFormData({
-      artist: '',
       title: '',
+      artist: '',
       lyrics: '',
     })
   }
@@ -192,8 +192,8 @@ function Dashboard() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Artist</TableHead>
                   <TableHead>Title</TableHead>
+                  <TableHead>Artist</TableHead>
                   <TableHead>Created</TableHead>
                   <TableHead>Updated</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -201,9 +201,9 @@ function Dashboard() {
               </TableHeader>
               <TableBody>
                 {lyrics.map((item) => (
-                  <TableRow key={`${item.artist}-${item.title}`}>
-                    <TableCell className="font-medium">{item.artist}</TableCell>
-                    <TableCell>{item.title}</TableCell>
+                  <TableRow key={`${item.title}-${item.artist}`}>
+                    <TableCell className="font-medium">{item.title}</TableCell>
+                    <TableCell>{item.artist}</TableCell>
                     <TableCell>
                       {new Date(item.createdAt).toLocaleDateString()}
                     </TableCell>
@@ -271,22 +271,6 @@ function Dashboard() {
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="artist">Artist</Label>
-                  <Input
-                    id="artist"
-                    value={formData.artist}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        artist: e.target.value,
-                      }))
-                    }
-                    placeholder="Enter artist name"
-                    required
-                    disabled={!!editingLyrics}
-                  />
-                </div>
-                <div className="space-y-2">
                   <Label htmlFor="title">Title</Label>
                   <Input
                     id="title"
@@ -298,6 +282,22 @@ function Dashboard() {
                       }))
                     }
                     placeholder="Enter song title"
+                    required
+                    disabled={!!editingLyrics}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="artist">Artist</Label>
+                  <Input
+                    id="artist"
+                    value={formData.artist}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        artist: e.target.value,
+                      }))
+                    }
+                    placeholder="Enter artist name"
                     required
                     disabled={!!editingLyrics}
                   />
