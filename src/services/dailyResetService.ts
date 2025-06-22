@@ -8,6 +8,7 @@ import {
 } from '../repositories/userGuild'
 import { appConfig } from './config'
 import { Database, DatabaseError, DatabaseLive } from './database'
+import { WordService, WordServiceLive } from './word'
 
 export class DailyResetServiceError extends DatabaseError {}
 
@@ -15,7 +16,7 @@ export class DailyResetService extends Context.Tag('DailyResetService')<
   DailyResetService,
   {
     performDailyReset: () => Effect.Effect<
-      { creditCount: number; resetCount: number },
+      { creditCount: number; resetCount: number; todaysWord: string },
       DailyResetServiceError
     >
   }
@@ -25,6 +26,7 @@ const make = Effect.gen(function* () {
   const db = yield* Database
   const userRepository = yield* UserRepository
   const userGuildRepository = yield* UserGuildRepository
+  const wordService = yield* WordService
 
   const config = yield* appConfig
 
@@ -118,23 +120,24 @@ const make = Effect.gen(function* () {
   return DailyResetService.of({
     performDailyReset: () =>
       Effect.gen(function* () {
-        yield* Effect.logInfo(
-          'DailyResetService: Starting daily credit refill and metric reset'
-        )
+        yield* Effect.logInfo('DailyResetService: Starting daily reset')
 
         const startTime = Date.now()
 
         const { creditCount } = yield* refillAllCredits
         const { resetCount } = yield* resetAllDailyMetrics
 
+        // Select today's word
+        const dailyWord = yield* wordService.selectTodaysWord()
+
         const endTime = Date.now()
         const duration = endTime - startTime
 
         yield* Effect.logInfo(
-          `DailyResetService: Successfully refilled ${creditCount} users and reset ${resetCount} daily metrics in ${duration}ms`
+          `DailyResetService: Successfully refilled ${creditCount} users, reset ${resetCount} daily metrics, and selected word "${dailyWord.word}" in ${duration}ms`
         )
 
-        return { creditCount, resetCount }
+        return { creditCount, resetCount, todaysWord: dailyWord.word }
       }).pipe(
         Effect.catchAll((error) =>
           Effect.gen(function* () {
@@ -155,5 +158,6 @@ const make = Effect.gen(function* () {
 export const DailyResetServiceLive = Layer.effect(DailyResetService, make).pipe(
   Layer.provide(UserRepositoryLive),
   Layer.provide(UserGuildRepositoryLive),
+  Layer.provide(WordServiceLive),
   Layer.provide(DatabaseLive)
 )

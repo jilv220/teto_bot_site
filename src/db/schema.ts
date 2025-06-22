@@ -1,5 +1,6 @@
 import {
   bigint,
+  date,
   foreignKey,
   index,
   integer,
@@ -64,7 +65,7 @@ export const users = pgTable(
     lastVotedAt: timestamp('last_voted_at', { mode: 'string' }),
     // You can use { mode: "bigint" } if numbers are exceeding js number limitations
     messageCredits: bigint('message_credits', { mode: 'bigint' })
-      .default(BigInt(30))
+      .default(30 as unknown as bigint)
       .notNull(),
   },
   (table) => [
@@ -101,7 +102,7 @@ export const userGuilds = pgTable(
     lastFeed: timestamp('last_feed', { mode: 'string' }),
     // You can use { mode: "bigint" } if numbers are exceeding js number limitations
     dailyMessageCount: bigint('daily_message_count', { mode: 'bigint' })
-      .default(BigInt(0))
+      .default(0 as unknown as bigint)
       .notNull(),
   },
   (table) => [
@@ -153,5 +154,22 @@ export const userGuilds = pgTable(
       columns: [table.userId, table.guildId],
       name: 'user_guilds_pkey',
     }),
+  ]
+)
+
+export const dailyWords = pgTable(
+  'daily_words',
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    word: text().notNull(),
+    selectedDate: date('selected_date').notNull(),
+    insertedAt: timestamp('inserted_at', { mode: 'string' }).notNull(),
+  },
+  (table) => [
+    uniqueIndex('daily_words_unique_date_index').using(
+      'btree',
+      table.selectedDate.asc().nullsLast()
+    ),
+    index().using('btree', table.selectedDate.asc().nullsLast()),
   ]
 )

@@ -664,6 +664,22 @@ export async function handleApiResponse<T>(
   return response as T
 }
 
+// Word of the Day Types
+export interface WordOfTheDayResponse {
+  word: string
+  date: string
+}
+
+// Word of the Day API
+export const wordOfTheDayApi = {
+  /**
+   * Get today's word
+   */
+  async getTodaysWord(): Promise<ApiResponse<WordOfTheDayResponse>> {
+    return api<WordOfTheDayResponse>('/word-of-the-day')
+  },
+}
+
 // =====================
 // EXPORT ALL APIs
 // =====================
@@ -679,6 +695,8 @@ export const discordBotApi = {
   // New optimized operations
   discord: discordOpsApi,
   leaderboard: leaderboardApi,
+  // Word of the day
+  wordOfTheDay: wordOfTheDayApi,
 }
 
 export default discordBotApi
