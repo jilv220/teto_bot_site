@@ -24,7 +24,7 @@ export const ServerRoute = createServerFileRoute('/auth/callback').methods({
       return new Response(null, {
         status: 302,
         headers: {
-          Location: `/auth/error?error=${encodeURIComponent(error)}`,
+          Location: `/?error=discord_oauth_error&details=${encodeURIComponent(error)}`,
         },
       })
     }
@@ -33,7 +33,7 @@ export const ServerRoute = createServerFileRoute('/auth/callback').methods({
       return new Response(null, {
         status: 302,
         headers: {
-          Location: '/auth/error?error=no_code',
+          Location: '/?error=no_code',
         },
       })
     }
@@ -58,7 +58,7 @@ export const ServerRoute = createServerFileRoute('/auth/callback').methods({
         return new Response(null, {
           status: 302,
           headers: {
-            Location: '/auth/error?error=not_admin',
+            Location: '/?error=access_denied',
           },
         })
       }
@@ -94,11 +94,10 @@ export const ServerRoute = createServerFileRoute('/auth/callback').methods({
         },
       })
     } catch (error) {
-      console.error('OAuth callback error:', error)
       return new Response(null, {
         status: 302,
         headers: {
-          Location: '/auth/error?error=callback_failed',
+          Location: `/?error=callback_failed&details=${encodeURIComponent(String(error))}`,
         },
       })
     }

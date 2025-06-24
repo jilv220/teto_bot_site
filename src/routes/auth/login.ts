@@ -6,13 +6,21 @@ export const ServerRoute = createServerFileRoute('/auth/login').methods({
     const url = new URL(request.url)
     const returnTo = url.searchParams.get('returnTo') || '/admin'
 
-    const authUrl = await getDiscordAuthUrl(returnTo)
-
-    return new Response(null, {
-      status: 302,
-      headers: {
-        Location: authUrl,
-      },
-    })
+    try {
+      const authUrl = await getDiscordAuthUrl(returnTo)
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: authUrl,
+        },
+      })
+    } catch (error) {
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: '/?error=auth_url_generation_failed',
+        },
+      })
+    }
   },
 })

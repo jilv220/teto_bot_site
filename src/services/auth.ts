@@ -4,7 +4,7 @@ import { appConfig } from './config'
 
 // Discord OAuth2 URLs
 const DISCORD_API_BASE = 'https://discord.com/api/v10'
-const DISCORD_OAUTH_BASE = 'https://discord.com/oauth2'
+const DISCORD_OAUTH_BASE = 'https://discord.com/api/oauth2'
 
 // Types
 export interface DiscordUser {
@@ -41,32 +41,44 @@ export const getDiscordAuthUrl = async (state?: string): Promise<string> => {
 export const exchangeCodeForToken = async (code: string) => {
   const config = await Effect.runPromise(appConfig)
 
+  const decodedCode = decodeURIComponent(code)
+  const requestBody = new URLSearchParams({
+    client_id: config.discordClientId,
+    client_secret: config.discordClientSecret,
+    grant_type: 'authorization_code',
+    code: decodedCode,
+    redirect_uri: config.discordRedirectUri,
+  })
+
   const response = await fetch(`${DISCORD_OAUTH_BASE}/token`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
+      Accept: 'application/json',
     },
-    body: new URLSearchParams({
-      client_id: config.discordClientId,
-      client_secret: config.discordClientSecret,
-      grant_type: 'authorization_code',
-      code,
-      redirect_uri: config.discordRedirectUri,
-    }),
+    body: requestBody,
   })
+
+  const responseText = await response.text()
 
   if (!response.ok) {
     throw new Error(
-      `Discord OAuth error: ${response.status} ${response.statusText}`
+      `Discord OAuth error: ${response.status} ${response.statusText} - ${responseText}`
     )
   }
 
-  return (await response.json()) as {
-    access_token: string
-    token_type: string
-    expires_in: number
-    refresh_token: string
-    scope: string
+  try {
+    const tokenData = JSON.parse(responseText) as {
+      access_token: string
+      token_type: string
+      expires_in: number
+      refresh_token: string
+      scope: string
+    }
+
+    return tokenData
+  } catch (error) {
+    throw new Error(`Discord OAuth response parsing failed: ${error}`)
   }
 }
 

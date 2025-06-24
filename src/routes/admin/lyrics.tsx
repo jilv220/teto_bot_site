@@ -30,7 +30,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -44,17 +43,17 @@ import {
 } from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
 import type { Lyrics } from '@/repositories/lyrics'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
-import { Edit, Music, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Edit, Music, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
-export const Route = createFileRoute('/dashboard')({
-  component: Dashboard,
+export const Route = createFileRoute('/admin/lyrics')({
+  component: LyricsManagement,
   loader: async () => await getAllLyrics(),
 })
 
-function Dashboard() {
+function LyricsManagement() {
   const router = useRouter()
   const lyricsResult = Route.useLoaderData()
   const lyrics = 'data' in lyricsResult ? lyricsResult.data.lyrics || [] : []
@@ -152,9 +151,17 @@ function Dashboard() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
+        <div className="flex items-center gap-4 mb-4">
+          <Link to="/admin">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Admin
+            </Button>
+          </Link>
+        </div>
         <div className="flex items-center gap-3 mb-2">
           <Music className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">Lyrics Dashboard</h1>
+          <h1 className="text-3xl font-bold">Lyrics Management</h1>
         </div>
         <p className="text-muted-foreground">Manage your lyrics collection</p>
       </div>

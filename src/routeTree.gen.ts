@@ -11,9 +11,10 @@
 import { createServerRootRoute } from '@tanstack/react-start/server'
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminLyricsRouteImport } from './routes/admin/lyrics'
 import { ServerRoute as AuthLogoutServerRouteImport } from './routes/auth/logout'
 import { ServerRoute as AuthLoginServerRouteImport } from './routes/auth/login'
 import { ServerRoute as AuthCallbackServerRouteImport } from './routes/auth/callback'
@@ -36,11 +37,6 @@ import { ServerRoute as ApiLyricsArtistTitleServerRouteImport } from './routes/a
 
 const rootServerRouteImport = createServerRootRoute()
 
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -50,6 +46,16 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLyricsRoute = AdminLyricsRouteImport.update({
+  id: '/lyrics',
+  path: '/lyrics',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AuthLogoutServerRoute = AuthLogoutServerRouteImport.update({
   id: '/auth/logout',
@@ -153,32 +159,33 @@ const ApiLyricsArtistTitleServerRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
-  '/dashboard': typeof DashboardRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/admin/lyrics': typeof AdminLyricsRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
-  '/dashboard': typeof DashboardRoute
+  '/admin/lyrics': typeof AdminLyricsRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
-  '/dashboard': typeof DashboardRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/admin/lyrics': typeof AdminLyricsRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/dashboard'
+  fullPaths: '/' | '/admin' | '/admin/lyrics' | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/dashboard'
-  id: '__root__' | '/' | '/admin' | '/dashboard'
+  to: '/' | '/admin/lyrics' | '/admin'
+  id: '__root__' | '/' | '/admin' | '/admin/lyrics' | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
-  DashboardRoute: typeof DashboardRoute
+  AdminRoute: typeof AdminRouteWithChildren
 }
 export interface FileServerRoutesByFullPath {
   '/api/channels': typeof ApiChannelsServerRouteWithChildren
@@ -329,13 +336,6 @@ export interface RootServerRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -349,6 +349,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/lyrics': {
+      id: '/admin/lyrics'
+      path: '/lyrics'
+      fullPath: '/admin/lyrics'
+      preLoaderRoute: typeof AdminLyricsRouteImport
+      parentRoute: typeof AdminRoute
     }
   }
 }
@@ -490,6 +504,18 @@ declare module '@tanstack/react-start/server' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminLyricsRoute: typeof AdminLyricsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminLyricsRoute: AdminLyricsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface ApiChannelsServerRouteChildren {
   ApiChannelsChannelIdServerRoute: typeof ApiChannelsChannelIdServerRoute
 }
@@ -541,8 +567,7 @@ const ApiUsersServerRouteWithChildren = ApiUsersServerRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
-  DashboardRoute: DashboardRoute,
+  AdminRoute: AdminRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
