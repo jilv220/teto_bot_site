@@ -9,6 +9,7 @@ export const authorizationMiddleware = createMiddleware({
   const event = getEvent()
   const headers = getHeaders(event)
   const authorization = headers.authorization
+
   const { botApiKey } = await Effect.runPromise(appConfig)
 
   if (!authorization || authorization !== `Bearer ${botApiKey}`) {

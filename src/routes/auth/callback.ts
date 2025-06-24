@@ -11,7 +11,36 @@ import {
   getEvent,
   setCookie,
 } from '@tanstack/react-start/server'
-import { Effect } from 'effect'
+import { Data, Effect } from 'effect'
+
+// Tagged errors for better type safety
+export class DiscordOAuthError extends Data.TaggedError('DiscordOAuthError')<{
+  message: string
+  details?: string
+}> {}
+
+export class NoCodeError extends Data.TaggedError('NoCodeError')<{
+  message: string
+}> {}
+
+export class AccessDeniedError extends Data.TaggedError('AccessDeniedError')<{
+  message: string
+}> {}
+
+export class TokenExchangeError extends Data.TaggedError('TokenExchangeError')<{
+  message: string
+  cause: unknown
+}> {}
+
+export class UserFetchError extends Data.TaggedError('UserFetchError')<{
+  message: string
+  cause: unknown
+}> {}
+
+export class CallbackError extends Data.TaggedError('CallbackError')<{
+  message: string
+  cause: unknown
+}> {}
 
 export const ServerRoute = createServerFileRoute('/auth/callback').methods({
   GET: async ({ request }) => {
@@ -21,20 +50,17 @@ export const ServerRoute = createServerFileRoute('/auth/callback').methods({
     const error = url.searchParams.get('error')
 
     if (error) {
-      return new Response(null, {
-        status: 302,
-        headers: {
-          Location: `/?error=discord_oauth_error&details=${encodeURIComponent(error)}`,
-        },
+      throw new DiscordOAuthError({
+        message:
+          'Discord rejected the login request. Please check your OAuth configuration.',
+        details: error,
       })
     }
 
     if (!code) {
-      return new Response(null, {
-        status: 302,
-        headers: {
-          Location: '/?error=no_code',
-        },
+      throw new NoCodeError({
+        message:
+          'No authorization code received from Discord. Please try logging in again.',
       })
     }
 
@@ -55,11 +81,9 @@ export const ServerRoute = createServerFileRoute('/auth/callback').methods({
 
       // Check if user has admin role
       if (user.role !== 'admin') {
-        return new Response(null, {
-          status: 302,
-          headers: {
-            Location: '/?error=access_denied',
-          },
+        throw new AccessDeniedError({
+          message:
+            'You need admin privileges to access the admin panel. Please contact an administrator.',
         })
       }
 
@@ -94,11 +118,43 @@ export const ServerRoute = createServerFileRoute('/auth/callback').methods({
         },
       })
     } catch (error) {
-      return new Response(null, {
-        status: 302,
-        headers: {
-          Location: `/?error=callback_failed&details=${encodeURIComponent(String(error))}`,
-        },
+      // If it's already a tagged error, just re-throw it
+      if (
+        error instanceof DiscordOAuthError ||
+        error instanceof NoCodeError ||
+        error instanceof AccessDeniedError
+      ) {
+        throw error
+      }
+
+      // Convert other errors to tagged errors
+      if (error instanceof Error) {
+        if (error.message.includes('Discord OAuth error')) {
+          throw new TokenExchangeError({
+            message:
+              'Failed to exchange authorization code for access token. This is likely a configuration issue.',
+            cause: error,
+          })
+        }
+        if (error.message.includes('Discord API error')) {
+          throw new UserFetchError({
+            message: 'Failed to retrieve user information from Discord.',
+            cause: error,
+          })
+        }
+        if (error.message.includes('parsing failed')) {
+          throw new CallbackError({
+            message:
+              'Discord returned an unexpected response format. This suggests a configuration problem.',
+            cause: error,
+          })
+        }
+      }
+
+      // Generic fallback error
+      throw new CallbackError({
+        message: 'An unexpected error occurred during authentication.',
+        cause: error,
       })
     }
   },

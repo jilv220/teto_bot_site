@@ -18,3 +18,7 @@ export const appConfig = Effect.gen(function* () {
     messageCreditCost: 1,
   }
 })
+
+export const siteConfig = {
+  title: 'Kasane Teto Bot',
+} as const

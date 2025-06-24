@@ -1,6 +1,6 @@
 ---
 description: 
-globs: *.ts,*.tsx
+globs: *.ts
 alwaysApply: false
 ---
 # EffectTS Code Style Guidelines
@@ -8,6 +8,7 @@ alwaysApply: false
 # System
 - This project uses bun as its package manager and runtime.
 - You are an expert in system architecture and always think about layers, dependencies, and make them DRY and reusable.
+- **Use Effect TS' Data.TaggedError** instead of creating your custom error
 
 ## Import Style
 - Use named imports with curly braces: `import { Effect, Console, Duration } from "effect"`

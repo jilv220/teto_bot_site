@@ -1,27 +1,42 @@
 import { getUsers } from '@/actions/user'
-import { UserService, UserServiceLive, verifyJWT } from '@/services'
-import { Link, Outlet, createFileRoute, redirect } from '@tanstack/react-router'
+import { Footer } from '@/components/Footer'
+import { Button } from '@/components/ui/button'
+import {
+  UserService,
+  UserServiceLive,
+  getDiscordAuthUrl,
+  verifyJWT,
+} from '@/services'
+import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getCookie } from '@tanstack/react-start/server'
 import { getEvent } from '@tanstack/react-start/server'
-import { Effect } from 'effect'
-import { BarChart3, Music, Settings, Users } from 'lucide-react'
-import { Button } from '../components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../components/ui/card'
+import { Data, Effect } from 'effect'
+import { AccessDeniedError } from './auth/callback'
 
-// Server function to check admin authentication
+export class AuthRequiredError extends Data.TaggedError('AuthRequiredError')<{
+  message: string
+}> {}
+
+export class UserNotFoundError extends Data.TaggedError('UserNotFoundError')<{
+  message: string
+}> {}
+
+export class InvalidAuthError extends Data.TaggedError('InvalidAuthError')<{
+  message: string
+  cause?: unknown
+}> {}
+
 const checkAdminAuth = createServerFn().handler(async () => {
   const event = getEvent()
   const token = getCookie(event, 'auth_token')
 
+  // Not Authed, throw to login with Discord
   if (!token) {
-    return { isAuthenticated: false as const, error: 'auth_required' as const }
+    const authUrl = await getDiscordAuthUrl(Route.path)
+    throw redirect({
+      href: authUrl,
+    })
   }
 
   try {
@@ -37,60 +52,59 @@ const checkAdminAuth = createServerFn().handler(async () => {
     )
 
     if (!user) {
-      return {
-        isAuthenticated: false as const,
-        error: 'user_not_found' as const,
-      }
+      throw new UserNotFoundError({
+        message: 'User account not found.',
+      })
     }
 
     if (user.role !== 'admin') {
-      return {
-        isAuthenticated: false as const,
-        error: 'access_denied' as const,
-      }
+      throw new AccessDeniedError({
+        message:
+          'You need admin privileges to access the admin panel. Please contact an administrator.',
+      })
     }
 
     return {
-      isAuthenticated: true as const,
       adminUser: user,
       adminSession: session,
     }
   } catch (error: unknown) {
     console.error('Admin authentication error:', error)
-    return { isAuthenticated: false as const, error: 'auth_failed' as const }
+
+    // Re-throw tagged errors as-is
+    if (
+      error instanceof UserNotFoundError ||
+      error instanceof AccessDeniedError
+    ) {
+      throw error
+    }
+
+    // Convert other errors to tagged error
+    throw new InvalidAuthError({
+      message: 'Invalid authentication. Please log in again.',
+      cause: error,
+    })
   }
 })
 
 export const Route = createFileRoute('/admin')({
-  component: AdminLayout,
-  loader: async () => await getUsers(),
-  beforeLoad: async ({ location }) => {
-    // Call the server function to check authentication
-    const authResult = await checkAdminAuth()
-
-    if (!authResult.isAuthenticated) {
-      throw redirect({
-        to: '/',
-        search: {
-          error: authResult.error || 'auth_failed',
-          redirect: location.href,
-          details: null,
-        },
-      })
-    }
-
-    // Return admin context (this gets merged into the route context)
-    return {
-      adminUser: authResult.adminUser,
-      adminSession: authResult.adminSession,
-    }
+  beforeLoad: async () => {
+    return await checkAdminAuth()
   },
+  loader: async () => await getUsers(),
+  component: AdminLayout,
+  errorComponent: ({ error, reset }) => (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div>{error.message}</div>
+      <Button onClick={() => reset()}>Reset</Button>
+      <Footer />
+    </div>
+  ),
 })
 
 function AdminLayout() {
   return (
     <div className="container mx-auto py-8 px-4">
-      {/* Outlet for child routes - this is where child route content will render */}
       <Outlet />
     </div>
   )

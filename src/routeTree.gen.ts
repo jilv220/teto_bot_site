@@ -12,11 +12,12 @@ import { createServerRootRoute } from '@tanstack/react-start/server'
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AdminRouteImport } from './routes/admin'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as MarketingRouteImport } from './routes/_marketing'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
 import { Route as AdminLyricsRouteImport } from './routes/admin/lyrics'
+import { Route as MarketingPrivacyRouteImport } from './routes/_marketing/privacy'
 import { ServerRoute as AuthLogoutServerRouteImport } from './routes/auth/logout'
-import { ServerRoute as AuthLoginServerRouteImport } from './routes/auth/login'
 import { ServerRoute as AuthCallbackServerRouteImport } from './routes/auth/callback'
 import { ServerRoute as ApiWordOfTheDayServerRouteImport } from './routes/api/word-of-the-day'
 import { ServerRoute as ApiWebhookServerRouteImport } from './routes/api/webhook'
@@ -42,9 +43,8 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const MarketingRoute = MarketingRouteImport.update({
+  id: '/_marketing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -52,19 +52,24 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const MarketingIndexRoute = MarketingIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MarketingRoute,
+} as any)
 const AdminLyricsRoute = AdminLyricsRouteImport.update({
   id: '/lyrics',
   path: '/lyrics',
   getParentRoute: () => AdminRoute,
 } as any)
+const MarketingPrivacyRoute = MarketingPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => MarketingRoute,
+} as any)
 const AuthLogoutServerRoute = AuthLogoutServerRouteImport.update({
   id: '/auth/logout',
   path: '/auth/logout',
-  getParentRoute: () => rootServerRouteImport,
-} as any)
-const AuthLoginServerRoute = AuthLoginServerRouteImport.update({
-  id: '/auth/login',
-  path: '/auth/login',
   getParentRoute: () => rootServerRouteImport,
 } as any)
 const AuthCallbackServerRoute = AuthCallbackServerRouteImport.update({
@@ -158,33 +163,44 @@ const ApiLyricsArtistTitleServerRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/privacy': typeof MarketingPrivacyRoute
   '/admin/lyrics': typeof AdminLyricsRoute
+  '/': typeof MarketingIndexRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/privacy': typeof MarketingPrivacyRoute
   '/admin/lyrics': typeof AdminLyricsRoute
+  '/': typeof MarketingIndexRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_marketing': typeof MarketingRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/_marketing/privacy': typeof MarketingPrivacyRoute
   '/admin/lyrics': typeof AdminLyricsRoute
+  '/_marketing/': typeof MarketingIndexRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/admin/lyrics' | '/admin/'
+  fullPaths: '/admin' | '/privacy' | '/admin/lyrics' | '/' | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin/lyrics' | '/admin'
-  id: '__root__' | '/' | '/admin' | '/admin/lyrics' | '/admin/'
+  to: '/privacy' | '/admin/lyrics' | '/' | '/admin'
+  id:
+    | '__root__'
+    | '/_marketing'
+    | '/admin'
+    | '/_marketing/privacy'
+    | '/admin/lyrics'
+    | '/_marketing/'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  MarketingRoute: typeof MarketingRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
 }
 export interface FileServerRoutesByFullPath {
@@ -200,7 +216,6 @@ export interface FileServerRoutesByFullPath {
   '/api/webhook': typeof ApiWebhookServerRoute
   '/api/word-of-the-day': typeof ApiWordOfTheDayServerRoute
   '/auth/callback': typeof AuthCallbackServerRoute
-  '/auth/login': typeof AuthLoginServerRoute
   '/auth/logout': typeof AuthLogoutServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
@@ -221,7 +236,6 @@ export interface FileServerRoutesByTo {
   '/api/webhook': typeof ApiWebhookServerRoute
   '/api/word-of-the-day': typeof ApiWordOfTheDayServerRoute
   '/auth/callback': typeof AuthCallbackServerRoute
-  '/auth/login': typeof AuthLoginServerRoute
   '/auth/logout': typeof AuthLogoutServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
@@ -243,7 +257,6 @@ export interface FileServerRoutesById {
   '/api/webhook': typeof ApiWebhookServerRoute
   '/api/word-of-the-day': typeof ApiWordOfTheDayServerRoute
   '/auth/callback': typeof AuthCallbackServerRoute
-  '/auth/login': typeof AuthLoginServerRoute
   '/auth/logout': typeof AuthLogoutServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
@@ -266,7 +279,6 @@ export interface FileServerRouteTypes {
     | '/api/webhook'
     | '/api/word-of-the-day'
     | '/auth/callback'
-    | '/auth/login'
     | '/auth/logout'
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
@@ -287,7 +299,6 @@ export interface FileServerRouteTypes {
     | '/api/webhook'
     | '/api/word-of-the-day'
     | '/auth/callback'
-    | '/auth/login'
     | '/auth/logout'
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
@@ -308,7 +319,6 @@ export interface FileServerRouteTypes {
     | '/api/webhook'
     | '/api/word-of-the-day'
     | '/auth/callback'
-    | '/auth/login'
     | '/auth/logout'
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
@@ -330,7 +340,6 @@ export interface RootServerRouteChildren {
   ApiWebhookServerRoute: typeof ApiWebhookServerRoute
   ApiWordOfTheDayServerRoute: typeof ApiWordOfTheDayServerRoute
   AuthCallbackServerRoute: typeof AuthCallbackServerRoute
-  AuthLoginServerRoute: typeof AuthLoginServerRoute
   AuthLogoutServerRoute: typeof AuthLogoutServerRoute
 }
 
@@ -343,11 +352,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/_marketing': {
+      id: '/_marketing'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof MarketingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -357,12 +366,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_marketing/': {
+      id: '/_marketing/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof MarketingIndexRouteImport
+      parentRoute: typeof MarketingRoute
+    }
     '/admin/lyrics': {
       id: '/admin/lyrics'
       path: '/lyrics'
       fullPath: '/admin/lyrics'
       preLoaderRoute: typeof AdminLyricsRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/_marketing/privacy': {
+      id: '/_marketing/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof MarketingPrivacyRouteImport
+      parentRoute: typeof MarketingRoute
     }
   }
 }
@@ -373,13 +396,6 @@ declare module '@tanstack/react-start/server' {
       path: '/auth/logout'
       fullPath: '/auth/logout'
       preLoaderRoute: typeof AuthLogoutServerRouteImport
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/auth/login': {
-      id: '/auth/login'
-      path: '/auth/login'
-      fullPath: '/auth/login'
-      preLoaderRoute: typeof AuthLoginServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
     '/auth/callback': {
@@ -504,6 +520,20 @@ declare module '@tanstack/react-start/server' {
   }
 }
 
+interface MarketingRouteChildren {
+  MarketingPrivacyRoute: typeof MarketingPrivacyRoute
+  MarketingIndexRoute: typeof MarketingIndexRoute
+}
+
+const MarketingRouteChildren: MarketingRouteChildren = {
+  MarketingPrivacyRoute: MarketingPrivacyRoute,
+  MarketingIndexRoute: MarketingIndexRoute,
+}
+
+const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
+  MarketingRouteChildren,
+)
+
 interface AdminRouteChildren {
   AdminLyricsRoute: typeof AdminLyricsRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -566,7 +596,7 @@ const ApiUsersServerRouteWithChildren = ApiUsersServerRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  MarketingRoute: MarketingRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
 }
 export const routeTree = rootRouteImport
@@ -585,7 +615,6 @@ const rootServerRouteChildren: RootServerRouteChildren = {
   ApiWebhookServerRoute: ApiWebhookServerRoute,
   ApiWordOfTheDayServerRoute: ApiWordOfTheDayServerRoute,
   AuthCallbackServerRoute: AuthCallbackServerRoute,
-  AuthLoginServerRoute: AuthLoginServerRoute,
   AuthLogoutServerRoute: AuthLogoutServerRoute,
 }
 export const serverRouteTree = rootServerRouteImport
