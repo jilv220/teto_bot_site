@@ -49,7 +49,7 @@ export const ServerRoute = createServerFileRoute('/api/leaderboard')
 
         const res = await Effect.runPromise(
           getIntimacyLeaderboardEffect(parsedGuildId, parsedLimit).pipe(
-            Effect.provide(GuildServiceLive)
+            Effect.provide(GuildServiceLive())
           )
         )
 

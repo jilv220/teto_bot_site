@@ -18,7 +18,7 @@ export const ServerRoute = createServerFileRoute('/api/users/$userId').methods({
     try {
       const userId = userIdSchema.parse(params.userId)
       const res = await Effect.runPromise(
-        getUserEffect(userId).pipe(Effect.provide(UserServiceLive))
+        getUserEffect(userId).pipe(Effect.provide(UserServiceLive()))
       )
 
       if ('error' in res && res.error) {
@@ -45,7 +45,7 @@ export const ServerRoute = createServerFileRoute('/api/users/$userId').methods({
       })
 
       const res = await Effect.runPromise(
-        updateUserEffect(updateData).pipe(Effect.provide(UserServiceLive))
+        updateUserEffect(updateData).pipe(Effect.provide(UserServiceLive()))
       )
 
       if ('error' in res && res.error) {
@@ -65,7 +65,7 @@ export const ServerRoute = createServerFileRoute('/api/users/$userId').methods({
     try {
       const userId = userIdSchema.parse(params.userId)
       const res = await Effect.runPromise(
-        deleteUserEffect(userId).pipe(Effect.provide(UserServiceLive))
+        deleteUserEffect(userId).pipe(Effect.provide(UserServiceLive()))
       )
 
       if ('error' in res && res.error) {

@@ -19,7 +19,7 @@ export const ServerRoute = createServerFileRoute(
     try {
       const guildId = guildIdSchema.parse(params.guildId)
       const res = await Effect.runPromise(
-        getGuildEffect(guildId).pipe(Effect.provide(GuildServiceLive))
+        getGuildEffect(guildId).pipe(Effect.provide(GuildServiceLive()))
       )
 
       if ('error' in res && res.error) {
@@ -44,7 +44,7 @@ export const ServerRoute = createServerFileRoute(
 
       const res = await Effect.runPromise(
         updateGuildEffect(guildId, updateData).pipe(
-          Effect.provide(GuildServiceLive)
+          Effect.provide(GuildServiceLive())
         )
       )
 
@@ -65,7 +65,7 @@ export const ServerRoute = createServerFileRoute(
     try {
       const guildId = guildIdSchema.parse(params.guildId)
       const res = await Effect.runPromise(
-        deleteGuildEffect(guildId).pipe(Effect.provide(GuildServiceLive))
+        deleteGuildEffect(guildId).pipe(Effect.provide(GuildServiceLive()))
       )
 
       if ('error' in res && res.error) {

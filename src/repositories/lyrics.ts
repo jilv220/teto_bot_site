@@ -1,3 +1,4 @@
+import { serverOnly } from '@tanstack/react-start'
 import { Context, Effect, Layer } from 'effect'
 import { RedisService } from '../services/redis'
 
@@ -301,4 +302,6 @@ const make = Effect.gen(function* () {
   })
 })
 
-export const LyricsRepositoryLive = Layer.effect(LyricsRepository, make)
+export const LyricsRepositoryLive = serverOnly(() =>
+  Layer.effect(LyricsRepository, make)
+)

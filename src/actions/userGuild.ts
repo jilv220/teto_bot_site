@@ -168,7 +168,7 @@ export const updateUserGuildEffect = (
 
 export const getUserGuilds = createServerFn().handler(async () => {
   return await Effect.runPromise(
-    getUserGuildsEffect.pipe(Effect.provide(UserGuildServiceLive))
+    getUserGuildsEffect.pipe(Effect.provide(UserGuildServiceLive()))
   )
 })
 
@@ -179,7 +179,7 @@ export const getUserGuild = createServerFn({ method: 'GET' })
   .handler(async ({ data: params }) => {
     return await Effect.runPromise(
       getUserGuildEffect(params.userId, params.guildId).pipe(
-        Effect.provide(UserGuildServiceLive)
+        Effect.provide(UserGuildServiceLive())
       )
     )
   })
@@ -191,7 +191,7 @@ export const createUserGuild = createServerFn({ method: 'POST' })
   .handler(async ({ data: userGuildData }) => {
     return await Effect.runPromise(
       createUserGuildEffect(userGuildData).pipe(
-        Effect.provide(UserGuildServiceLive)
+        Effect.provide(UserGuildServiceLive())
       )
     )
   })
@@ -202,6 +202,6 @@ export const updateUserGuild = createServerFn({ method: 'POST' })
   })
   .handler(async ({ data: params }) => {
     return await Effect.runPromise(
-      updateUserGuildEffect(params).pipe(Effect.provide(UserGuildServiceLive))
+      updateUserGuildEffect(params).pipe(Effect.provide(UserGuildServiceLive()))
     )
   })

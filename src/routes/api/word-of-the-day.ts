@@ -40,7 +40,7 @@ export const ServerRoute = createServerFileRoute('/api/word-of-the-day')
       )
 
       const result = await Effect.runPromise(
-        program.pipe(Effect.provide(WordServiceLive))
+        program.pipe(Effect.provide(WordServiceLive()))
       )
 
       if ('error' in result && result.error) {

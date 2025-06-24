@@ -1,3 +1,4 @@
+import { serverOnly } from '@tanstack/react-start'
 import { Context, Effect, Layer } from 'effect'
 import {
   type CreateUserInput,
@@ -149,12 +150,16 @@ const make = Effect.gen(function* () {
   })
 })
 
-export const UserServiceLive = Layer.effect(UserService, make).pipe(
-  Layer.provide(UserRepositoryLive),
-  Layer.provide(DatabaseLive)
+export const UserServiceLive = serverOnly(() =>
+  Layer.effect(UserService, make).pipe(
+    Layer.provide(UserRepositoryLive),
+    Layer.provide(DatabaseLive())
+  )
 )
 
-export const UserServiceMock = Layer.effect(UserService, make).pipe(
-  Layer.provide(UserRepositoryMock),
-  Layer.provide(DatabaseLive)
+export const UserServiceMock = serverOnly(() =>
+  Layer.effect(UserService, make).pipe(
+    Layer.provide(UserRepositoryMock),
+    Layer.provide(DatabaseLive())
+  )
 )

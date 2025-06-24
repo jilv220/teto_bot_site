@@ -28,7 +28,7 @@ export const ServerRoute = createServerFileRoute('/api/system-prompt').methods({
     )
 
     return await Effect.runPromise(
-      Effect.scoped(Effect.provide(program, RedisServiceLive))
+      Effect.scoped(Effect.provide(program, RedisServiceLive()))
     )
   },
 
@@ -72,7 +72,7 @@ export const ServerRoute = createServerFileRoute('/api/system-prompt').methods({
     )
 
     return await Effect.runPromise(
-      Effect.scoped(Effect.provide(program, RedisServiceLive))
+      Effect.scoped(Effect.provide(program, RedisServiceLive()))
     )
   },
 })

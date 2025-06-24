@@ -1,7 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { Effect } from 'effect'
 import z from 'zod/v4'
-import type { Lyrics } from '../repositories/lyrics'
 import { LyricsService, LyricsServiceLive } from '../services/lyrics'
 
 // Zod schemas for validation

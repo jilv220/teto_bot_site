@@ -71,7 +71,7 @@ export const getChannelEffect = (channelId: bigint) =>
         error: { code: 500, message: 'Failed to fetch channel' },
       })
     ),
-    Effect.provide(ChannelServiceLive)
+    Effect.provide(ChannelServiceLive())
   )
 
 export const createChannelEffect = (channelId: bigint, guildId: bigint) =>
@@ -175,7 +175,7 @@ export const deleteChannelEffect = (channelId: bigint) =>
         },
       })
     ),
-    Effect.provide(ChannelServiceLive)
+    Effect.provide(ChannelServiceLive())
   )
 
 /**
@@ -186,13 +186,13 @@ export const getChannel = createServerFn()
   .validator((data: unknown) => GetChannelParamsSchema.parse(data))
   .handler(async ({ data: channelId }) => {
     return await Effect.runPromise(
-      getChannelEffect(channelId).pipe(Effect.provide(ChannelServiceLive))
+      getChannelEffect(channelId).pipe(Effect.provide(ChannelServiceLive()))
     )
   })
 
 export const getChannels = createServerFn().handler(async () => {
   return await Effect.runPromise(
-    getChannelsEffect.pipe(Effect.provide(ChannelServiceLive))
+    getChannelsEffect.pipe(Effect.provide(ChannelServiceLive()))
   )
 })
 
@@ -203,7 +203,7 @@ export const createChannel = createServerFn({ method: 'POST' })
   .handler(async ({ data: channelData }) => {
     return await Effect.runPromise(
       createChannelEffect(channelData.channelId, channelData.guildId).pipe(
-        Effect.provide(ChannelServiceLive)
+        Effect.provide(ChannelServiceLive())
       )
     )
   })
@@ -214,7 +214,7 @@ export const updateChannel = createServerFn({ method: 'POST' })
   })
   .handler(async ({ data: updateData }) => {
     return await Effect.runPromise(
-      updateChannelEffect(updateData).pipe(Effect.provide(ChannelServiceLive))
+      updateChannelEffect(updateData).pipe(Effect.provide(ChannelServiceLive()))
     )
   })
 
@@ -222,6 +222,6 @@ export const deleteChannel = createServerFn({ method: 'POST' })
   .validator((data: unknown) => DeleteChannelParamsSchema.parse(data))
   .handler(async ({ data: channelId }) => {
     return await Effect.runPromise(
-      deleteChannelEffect(channelId).pipe(Effect.provide(ChannelServiceLive))
+      deleteChannelEffect(channelId).pipe(Effect.provide(ChannelServiceLive()))
     )
   })

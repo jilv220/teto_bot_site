@@ -21,7 +21,7 @@ export const ServerRoute = createServerFileRoute('/api/users')
   .methods({
     GET: async () => {
       const res = await Effect.runPromise(
-        getUsersEffect.pipe(Effect.provide(UserServiceLive))
+        getUsersEffect.pipe(Effect.provide(UserServiceLive()))
       )
 
       if ('error' in res) {
@@ -38,7 +38,7 @@ export const ServerRoute = createServerFileRoute('/api/users')
         const { userId, role } = CreateUserSchema.parse(parsedBody)
 
         const res = await Effect.runPromise(
-          createUserEffect(userId, role).pipe(Effect.provide(UserServiceLive))
+          createUserEffect(userId, role).pipe(Effect.provide(UserServiceLive()))
         )
 
         if ('error' in res) {

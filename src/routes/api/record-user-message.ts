@@ -29,9 +29,9 @@ export const ServerRoute = createServerFileRoute('/api/record-user-message')
 
         const res = await Effect.runPromise(
           recordUserMessageEffect(params).pipe(
-            Effect.provide(UserServiceLive),
-            Effect.provide(UserGuildServiceLive),
-            Effect.provide(GuildServiceLive)
+            Effect.provide(UserServiceLive()),
+            Effect.provide(UserGuildServiceLive()),
+            Effect.provide(GuildServiceLive())
           )
         )
 

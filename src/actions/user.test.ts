@@ -7,7 +7,7 @@ describe('User Actions', () => {
   describe('createUserEffect', () => {
     it('should create a new user successfully', async () => {
       const result = await Effect.runPromise(
-        createUserEffect(123n, 'admin').pipe(Effect.provide(UserServiceMock))
+        createUserEffect(123n, 'admin').pipe(Effect.provide(UserServiceMock()))
       )
 
       if ('error' in result) {
@@ -40,7 +40,7 @@ describe('User Actions', () => {
       })
 
       const result = await Effect.runPromise(
-        program.pipe(Effect.provide(UserServiceMock))
+        program.pipe(Effect.provide(UserServiceMock()))
       )
 
       if ('data' in result) {
@@ -54,7 +54,7 @@ describe('User Actions', () => {
 
     it('should auto-generate userId and apply defaults', async () => {
       const result = await Effect.runPromise(
-        createUserEffect(0n).pipe(Effect.provide(UserServiceMock))
+        createUserEffect(0n).pipe(Effect.provide(UserServiceMock()))
       )
 
       if ('error' in result) {
@@ -73,7 +73,7 @@ describe('User Actions', () => {
   describe('getUsersTask', () => {
     it('should return empty array when no users exist', async () => {
       const result = await Effect.runPromise(
-        getUsersEffect.pipe(Effect.provide(UserServiceMock))
+        getUsersEffect.pipe(Effect.provide(UserServiceMock()))
       )
 
       if ('error' in result) {
@@ -101,7 +101,7 @@ describe('User Actions', () => {
       })
 
       const result = await Effect.runPromise(
-        program.pipe(Effect.provide(UserServiceMock))
+        program.pipe(Effect.provide(UserServiceMock()))
       )
 
       if ('error' in result) {
@@ -123,7 +123,7 @@ describe('User Actions', () => {
       // This test demonstrates the error handling capability
       // For now, we'll test the success case since our mock doesn't fail
       const result = await Effect.runPromise(
-        getUsersEffect.pipe(Effect.provide(UserServiceMock))
+        getUsersEffect.pipe(Effect.provide(UserServiceMock()))
       )
 
       // Should not have error in success case with our mock
@@ -144,7 +144,7 @@ describe('User Actions', () => {
       })
 
       const result = await Effect.runPromise(
-        program.pipe(Effect.provide(UserServiceMock))
+        program.pipe(Effect.provide(UserServiceMock()))
       )
 
       if ('error' in result.createResult) {

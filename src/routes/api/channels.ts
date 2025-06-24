@@ -19,7 +19,7 @@ export const ServerRoute = createServerFileRoute('/api/channels')
   .methods({
     GET: async () => {
       const res = await Effect.runPromise(
-        getChannelsEffect.pipe(Effect.provide(ChannelServiceLive))
+        getChannelsEffect.pipe(Effect.provide(ChannelServiceLive()))
       )
 
       if ('error' in res) {
@@ -37,7 +37,7 @@ export const ServerRoute = createServerFileRoute('/api/channels')
 
         const res = await Effect.runPromise(
           createChannelEffect(channelId, guildId).pipe(
-            Effect.provide(ChannelServiceLive)
+            Effect.provide(ChannelServiceLive())
           )
         )
 

@@ -17,7 +17,9 @@ export const ServerRoute = createServerFileRoute('/api/lyrics').methods({
   GET: async () => {
     // Get all lyrics
     const res = await Effect.runPromise(
-      Effect.scoped(getAllLyricsEffect.pipe(Effect.provide(LyricsServiceLive)))
+      Effect.scoped(
+        getAllLyricsEffect.pipe(Effect.provide(LyricsServiceLive()))
+      )
     )
 
     if ('error' in res) {
@@ -35,7 +37,9 @@ export const ServerRoute = createServerFileRoute('/api/lyrics').methods({
 
       const res = await Effect.runPromise(
         Effect.scoped(
-          createLyricsEffect(lyricsData).pipe(Effect.provide(LyricsServiceLive))
+          createLyricsEffect(lyricsData).pipe(
+            Effect.provide(LyricsServiceLive())
+          )
         )
       )
 

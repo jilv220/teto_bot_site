@@ -19,7 +19,7 @@ export const ServerRoute = createServerFileRoute('/api/guilds')
   .methods({
     GET: async () => {
       const res = await Effect.runPromise(
-        getGuildsEffect.pipe(Effect.provide(GuildServiceLive))
+        getGuildsEffect.pipe(Effect.provide(GuildServiceLive()))
       )
 
       if ('error' in res) {
@@ -36,7 +36,7 @@ export const ServerRoute = createServerFileRoute('/api/guilds')
         const { guildId } = CreateGuildSchema.parse(parsedBody)
 
         const res = await Effect.runPromise(
-          createGuildEffect(guildId).pipe(Effect.provide(GuildServiceLive))
+          createGuildEffect(guildId).pipe(Effect.provide(GuildServiceLive()))
         )
 
         if ('error' in res) {

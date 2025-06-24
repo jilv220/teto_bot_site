@@ -12,8 +12,11 @@ import { createServerRootRoute } from '@tanstack/react-start/server'
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
-import { ServerRoute as ApiWordResponseServerRouteImport } from './routes/api/word-response'
+import { ServerRoute as AuthLogoutServerRouteImport } from './routes/auth/logout'
+import { ServerRoute as AuthLoginServerRouteImport } from './routes/auth/login'
+import { ServerRoute as AuthCallbackServerRouteImport } from './routes/auth/callback'
 import { ServerRoute as ApiWordOfTheDayServerRouteImport } from './routes/api/word-of-the-day'
 import { ServerRoute as ApiWebhookServerRouteImport } from './routes/api/webhook'
 import { ServerRoute as ApiUsersServerRouteImport } from './routes/api/users'
@@ -38,14 +41,29 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiWordResponseServerRoute = ApiWordResponseServerRouteImport.update({
-  id: '/api/word-response',
-  path: '/api/word-response',
+const AuthLogoutServerRoute = AuthLogoutServerRouteImport.update({
+  id: '/auth/logout',
+  path: '/auth/logout',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
+const AuthLoginServerRoute = AuthLoginServerRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
+const AuthCallbackServerRoute = AuthCallbackServerRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
   getParentRoute: () => rootServerRouteImport,
 } as any)
 const ApiWordOfTheDayServerRoute = ApiWordOfTheDayServerRouteImport.update({
@@ -135,27 +153,31 @@ const ApiLyricsArtistTitleServerRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard'
+  fullPaths: '/' | '/admin' | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard'
-  id: '__root__' | '/' | '/dashboard'
+  to: '/' | '/admin' | '/dashboard'
+  id: '__root__' | '/' | '/admin' | '/dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   DashboardRoute: typeof DashboardRoute
 }
 export interface FileServerRoutesByFullPath {
@@ -170,7 +192,9 @@ export interface FileServerRoutesByFullPath {
   '/api/users': typeof ApiUsersServerRouteWithChildren
   '/api/webhook': typeof ApiWebhookServerRoute
   '/api/word-of-the-day': typeof ApiWordOfTheDayServerRoute
-  '/api/word-response': typeof ApiWordResponseServerRoute
+  '/auth/callback': typeof AuthCallbackServerRoute
+  '/auth/login': typeof AuthLoginServerRoute
+  '/auth/logout': typeof AuthLogoutServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
   '/api/lyrics/$title': typeof ApiLyricsTitleServerRoute
@@ -189,7 +213,9 @@ export interface FileServerRoutesByTo {
   '/api/users': typeof ApiUsersServerRouteWithChildren
   '/api/webhook': typeof ApiWebhookServerRoute
   '/api/word-of-the-day': typeof ApiWordOfTheDayServerRoute
-  '/api/word-response': typeof ApiWordResponseServerRoute
+  '/auth/callback': typeof AuthCallbackServerRoute
+  '/auth/login': typeof AuthLoginServerRoute
+  '/auth/logout': typeof AuthLogoutServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
   '/api/lyrics/$title': typeof ApiLyricsTitleServerRoute
@@ -209,7 +235,9 @@ export interface FileServerRoutesById {
   '/api/users': typeof ApiUsersServerRouteWithChildren
   '/api/webhook': typeof ApiWebhookServerRoute
   '/api/word-of-the-day': typeof ApiWordOfTheDayServerRoute
-  '/api/word-response': typeof ApiWordResponseServerRoute
+  '/auth/callback': typeof AuthCallbackServerRoute
+  '/auth/login': typeof AuthLoginServerRoute
+  '/auth/logout': typeof AuthLogoutServerRoute
   '/api/channels/$channelId': typeof ApiChannelsChannelIdServerRoute
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
   '/api/lyrics/$title': typeof ApiLyricsTitleServerRoute
@@ -230,7 +258,9 @@ export interface FileServerRouteTypes {
     | '/api/users'
     | '/api/webhook'
     | '/api/word-of-the-day'
-    | '/api/word-response'
+    | '/auth/callback'
+    | '/auth/login'
+    | '/auth/logout'
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
     | '/api/lyrics/$title'
@@ -249,7 +279,9 @@ export interface FileServerRouteTypes {
     | '/api/users'
     | '/api/webhook'
     | '/api/word-of-the-day'
-    | '/api/word-response'
+    | '/auth/callback'
+    | '/auth/login'
+    | '/auth/logout'
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
     | '/api/lyrics/$title'
@@ -268,7 +300,9 @@ export interface FileServerRouteTypes {
     | '/api/users'
     | '/api/webhook'
     | '/api/word-of-the-day'
-    | '/api/word-response'
+    | '/auth/callback'
+    | '/auth/login'
+    | '/auth/logout'
     | '/api/channels/$channelId'
     | '/api/guilds/$guildId'
     | '/api/lyrics/$title'
@@ -288,7 +322,9 @@ export interface RootServerRouteChildren {
   ApiUsersServerRoute: typeof ApiUsersServerRouteWithChildren
   ApiWebhookServerRoute: typeof ApiWebhookServerRoute
   ApiWordOfTheDayServerRoute: typeof ApiWordOfTheDayServerRoute
-  ApiWordResponseServerRoute: typeof ApiWordResponseServerRoute
+  AuthCallbackServerRoute: typeof AuthCallbackServerRoute
+  AuthLoginServerRoute: typeof AuthLoginServerRoute
+  AuthLogoutServerRoute: typeof AuthLogoutServerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -298,6 +334,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -311,11 +354,25 @@ declare module '@tanstack/react-router' {
 }
 declare module '@tanstack/react-start/server' {
   interface ServerFileRoutesByPath {
-    '/api/word-response': {
-      id: '/api/word-response'
-      path: '/api/word-response'
-      fullPath: '/api/word-response'
-      preLoaderRoute: typeof ApiWordResponseServerRouteImport
+    '/auth/logout': {
+      id: '/auth/logout'
+      path: '/auth/logout'
+      fullPath: '/auth/logout'
+      preLoaderRoute: typeof AuthLogoutServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
     '/api/word-of-the-day': {
@@ -484,6 +541,7 @@ const ApiUsersServerRouteWithChildren = ApiUsersServerRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   DashboardRoute: DashboardRoute,
 }
 export const routeTree = rootRouteImport
@@ -501,7 +559,9 @@ const rootServerRouteChildren: RootServerRouteChildren = {
   ApiUsersServerRoute: ApiUsersServerRouteWithChildren,
   ApiWebhookServerRoute: ApiWebhookServerRoute,
   ApiWordOfTheDayServerRoute: ApiWordOfTheDayServerRoute,
-  ApiWordResponseServerRoute: ApiWordResponseServerRoute,
+  AuthCallbackServerRoute: AuthCallbackServerRoute,
+  AuthLoginServerRoute: AuthLoginServerRoute,
+  AuthLogoutServerRoute: AuthLogoutServerRoute,
 }
 export const serverRouteTree = rootServerRouteImport
   ._addFileChildren(rootServerRouteChildren)

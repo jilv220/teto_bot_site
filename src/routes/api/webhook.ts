@@ -86,7 +86,7 @@ export const ServerRoute = createServerFileRoute('/api/webhook').methods({
         ),
         times: 3,
       }),
-      Effect.provide(UserServiceLive),
+      Effect.provide(UserServiceLive()),
       Effect.provide(Logger.pretty),
       Effect.tapError((error) => Effect.logError('Webhook error:', error)),
       Effect.catchAll((error) => {

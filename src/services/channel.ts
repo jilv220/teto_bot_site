@@ -1,3 +1,4 @@
+import { serverOnly } from '@tanstack/react-start'
 import { Context, Effect, Layer } from 'effect'
 import {
   type Channel,
@@ -62,7 +63,9 @@ const make = Effect.gen(function* () {
   })
 })
 
-export const ChannelServiceLive = Layer.effect(ChannelService, make).pipe(
-  Layer.provide(ChannelRepositoryLive),
-  Layer.provide(DatabaseLive)
+export const ChannelServiceLive = serverOnly(() =>
+  Layer.effect(ChannelService, make).pipe(
+    Layer.provide(ChannelRepositoryLive),
+    Layer.provide(DatabaseLive())
+  )
 )

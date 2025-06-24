@@ -82,5 +82,5 @@ const make = Effect.gen(function* () {
 })
 
 export const WordRepositoryLive = Layer.effect(WordRepository, make).pipe(
-  Layer.provide(DatabaseLive)
+  Layer.provide(DatabaseLive())
 )

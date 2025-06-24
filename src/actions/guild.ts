@@ -165,7 +165,7 @@ export const deleteGuildEffect = (guildId: bigint) =>
 
 export const getGuilds = createServerFn().handler(async () => {
   return await Effect.runPromise(
-    getGuildsEffect.pipe(Effect.provide(GuildServiceLive))
+    getGuildsEffect.pipe(Effect.provide(GuildServiceLive()))
   )
 })
 
@@ -173,7 +173,7 @@ export const getGuild = createServerFn()
   .validator((data: unknown) => guildIdSchema.parse(data))
   .handler(async ({ data: guildId }) => {
     return await Effect.runPromise(
-      getGuildEffect(guildId).pipe(Effect.provide(GuildServiceLive))
+      getGuildEffect(guildId).pipe(Effect.provide(GuildServiceLive()))
     )
   })
 
@@ -184,7 +184,7 @@ export const createGuild = createServerFn({ method: 'POST' })
   .handler(async ({ data: guildData }) => {
     return await Effect.runPromise(
       createGuildEffect(guildData.guildId).pipe(
-        Effect.provide(GuildServiceLive)
+        Effect.provide(GuildServiceLive())
       )
     )
   })
@@ -201,7 +201,7 @@ export const updateGuild = createServerFn({ method: 'POST' })
   .handler(async ({ data: { guildId, updateData } }) => {
     return await Effect.runPromise(
       updateGuildEffect(guildId, updateData).pipe(
-        Effect.provide(GuildServiceLive)
+        Effect.provide(GuildServiceLive())
       )
     )
   })
@@ -211,7 +211,7 @@ export const getIntimacyLeaderboard = createServerFn()
   .handler(async ({ data: { guildId, limit } }) => {
     return await Effect.runPromise(
       getIntimacyLeaderboardEffect(guildId, limit).pipe(
-        Effect.provide(GuildServiceLive)
+        Effect.provide(GuildServiceLive())
       )
     )
   })
@@ -220,6 +220,6 @@ export const deleteGuild = createServerFn({ method: 'POST' })
   .validator((data: unknown) => guildIdSchema.parse(data))
   .handler(async ({ data: guildId }) => {
     return await Effect.runPromise(
-      deleteGuildEffect(guildId).pipe(Effect.provide(GuildServiceLive))
+      deleteGuildEffect(guildId).pipe(Effect.provide(GuildServiceLive()))
     )
   })

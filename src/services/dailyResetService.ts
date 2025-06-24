@@ -158,6 +158,6 @@ const make = Effect.gen(function* () {
 export const DailyResetServiceLive = Layer.effect(DailyResetService, make).pipe(
   Layer.provide(UserRepositoryLive),
   Layer.provide(UserGuildRepositoryLive),
-  Layer.provide(WordServiceLive),
-  Layer.provide(DatabaseLive)
+  Layer.provide(WordServiceLive()),
+  Layer.provide(DatabaseLive())
 )

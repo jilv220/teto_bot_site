@@ -23,7 +23,7 @@ describe('Discord Actions', () => {
       })
 
       const result = await Effect.runPromise(
-        program.pipe(Effect.provide(UserServiceMock))
+        program.pipe(Effect.provide(UserServiceMock()))
       )
 
       expect(result.updatedUser.messageCredits).toBe(BigInt(29))
@@ -43,7 +43,7 @@ describe('Discord Actions', () => {
       })
 
       try {
-        await Effect.runPromise(program.pipe(Effect.provide(UserServiceMock)))
+        await Effect.runPromise(program.pipe(Effect.provide(UserServiceMock())))
         // Should not reach here
         expect(true).toBe(false)
       } catch (error) {

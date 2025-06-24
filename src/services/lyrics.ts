@@ -171,10 +171,9 @@ const make = Effect.gen(function* () {
   })
 })
 
-// This kept server code from leaking into client bundle
 export const LyricsServiceLive = serverOnly(() =>
   Layer.effect(LyricsService, make).pipe(
-    Layer.provide(LyricsRepositoryLive),
-    Layer.provide(RedisServiceLive)
+    Layer.provide(LyricsRepositoryLive()),
+    Layer.provide(RedisServiceLive())
   )
 )

@@ -1,3 +1,4 @@
+import { serverOnly } from '@tanstack/react-start'
 import { Context, Effect, Layer } from 'effect'
 import {
   type NewUserGuild,
@@ -183,7 +184,9 @@ const make = Effect.gen(function* () {
   })
 })
 
-export const UserGuildServiceLive = Layer.effect(UserGuildService, make).pipe(
-  Layer.provide(UserGuildRepositoryLive),
-  Layer.provide(DatabaseLive)
+export const UserGuildServiceLive = serverOnly(() =>
+  Layer.effect(UserGuildService, make).pipe(
+    Layer.provide(UserGuildRepositoryLive),
+    Layer.provide(DatabaseLive())
+  )
 )

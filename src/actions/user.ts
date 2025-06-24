@@ -67,7 +67,7 @@ export const getUserEffect = (userId: bigint) =>
         error: { code: 500, message: 'Failed to fetch user' },
       })
     }),
-    Effect.provide(UserServiceLive)
+    Effect.provide(UserServiceLive())
   )
 
 export const createUserEffect = (newUserId: bigint, role?: 'user' | 'admin') =>
@@ -120,7 +120,7 @@ export const deleteUserEffect = (userId: bigint) =>
         },
       })
     ),
-    Effect.provide(UserServiceLive)
+    Effect.provide(UserServiceLive())
   )
 
 export const updateUserEffect = (
@@ -164,13 +164,13 @@ export const getUser = createServerFn()
   .validator((data: unknown) => GetUserParamsSchema.parse(data))
   .handler(async ({ data: userId }) => {
     return await Effect.runPromise(
-      getUserEffect(userId).pipe(Effect.provide(UserServiceLive))
+      getUserEffect(userId).pipe(Effect.provide(UserServiceLive()))
     )
   })
 
 export const getUsers = createServerFn().handler(async () => {
   return await Effect.runPromise(
-    getUsersEffect.pipe(Effect.provide(UserServiceLive))
+    getUsersEffect.pipe(Effect.provide(UserServiceLive()))
   )
 })
 
@@ -181,7 +181,7 @@ export const createUser = createServerFn({ method: 'POST' })
   .handler(async ({ data: userData }) => {
     return await Effect.runPromise(
       createUserEffect(userData.userId, userData.role).pipe(
-        Effect.provide(UserServiceLive)
+        Effect.provide(UserServiceLive())
       )
     )
   })
@@ -192,7 +192,7 @@ export const updateUser = createServerFn({ method: 'POST' })
   })
   .handler(async ({ data: updateData }) => {
     return await Effect.runPromise(
-      updateUserEffect(updateData).pipe(Effect.provide(UserServiceLive))
+      updateUserEffect(updateData).pipe(Effect.provide(UserServiceLive()))
     )
   })
 
@@ -200,6 +200,6 @@ export const deleteUser = createServerFn({ method: 'POST' })
   .validator((data: unknown) => DeleteUserParamsSchema.parse(data))
   .handler(async ({ data: userId }) => {
     return await Effect.runPromise(
-      deleteUserEffect(userId).pipe(Effect.provide(UserServiceLive))
+      deleteUserEffect(userId).pipe(Effect.provide(UserServiceLive()))
     )
   })

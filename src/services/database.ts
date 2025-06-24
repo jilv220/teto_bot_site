@@ -3,6 +3,7 @@ import { Context, Data, Effect, Layer } from 'effect'
 import { Pool } from 'pg'
 import { appConfig } from './config'
 
+import { serverOnly } from '@tanstack/react-start'
 import * as schema from '../db/schema'
 
 export class DatabaseError extends Data.TaggedError('DatabaseError')<{
@@ -28,4 +29,4 @@ const make = () =>
     return drizzle({ client: pool, schema })
   })
 
-export const DatabaseLive = Layer.effect(Database, make())
+export const DatabaseLive = serverOnly(() => Layer.effect(Database, make()))

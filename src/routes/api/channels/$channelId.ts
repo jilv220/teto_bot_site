@@ -19,7 +19,7 @@ export const ServerRoute = createServerFileRoute(
     try {
       const channelId = channelIdSchema.parse(params.channelId)
       const res = await Effect.runPromise(
-        getChannelEffect(channelId).pipe(Effect.provide(ChannelServiceLive))
+        getChannelEffect(channelId).pipe(Effect.provide(ChannelServiceLive()))
       )
 
       if ('error' in res && res.error) {
@@ -46,7 +46,9 @@ export const ServerRoute = createServerFileRoute(
       })
 
       const res = await Effect.runPromise(
-        updateChannelEffect(updateData).pipe(Effect.provide(ChannelServiceLive))
+        updateChannelEffect(updateData).pipe(
+          Effect.provide(ChannelServiceLive())
+        )
       )
 
       if ('error' in res && res.error) {
@@ -66,7 +68,9 @@ export const ServerRoute = createServerFileRoute(
     try {
       const channelId = channelIdSchema.parse(params.channelId)
       const res = await Effect.runPromise(
-        deleteChannelEffect(channelId).pipe(Effect.provide(ChannelServiceLive))
+        deleteChannelEffect(channelId).pipe(
+          Effect.provide(ChannelServiceLive())
+        )
       )
 
       if ('error' in res && res.error) {

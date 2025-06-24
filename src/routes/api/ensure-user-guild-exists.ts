@@ -31,9 +31,9 @@ export const ServerRoute = createServerFileRoute(
 
         const res = await Effect.runPromise(
           ensureUserGuildExistsEffect(params).pipe(
-            Effect.provide(UserServiceLive),
-            Effect.provide(UserGuildServiceLive),
-            Effect.provide(GuildServiceLive)
+            Effect.provide(UserServiceLive()),
+            Effect.provide(UserGuildServiceLive()),
+            Effect.provide(GuildServiceLive())
           )
         )
 

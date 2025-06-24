@@ -1,5 +1,4 @@
-import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { serverOnly } from '@tanstack/react-start'
 import { Context, Effect, Layer } from 'effect'
 import {
   type DailyWord,
@@ -9,6 +8,9 @@ import {
   WordRepositoryLive,
 } from '../repositories/word'
 import { DatabaseError, DatabaseLive } from './database'
+
+import fs from 'node:fs/promises'
+import path from 'node:path'
 
 export class WordServiceError extends DatabaseError {}
 
@@ -42,9 +44,9 @@ export class WordService extends Context.Tag('WordService')<
 >() {}
 
 const loadWordsFromFile = Effect.gen(function* () {
-  const wordsPath = join(process.cwd(), 'src/data/words.json')
+  const wordsPath = path.join(process.cwd(), 'src/data/words.json')
   const wordsFile = yield* Effect.tryPromise({
-    try: () => readFile(wordsPath, 'utf-8'),
+    try: () => fs.readFile(wordsPath, 'utf-8'),
     catch: (error) =>
       new WordServiceError({
         message: `Failed to load words file: ${error}`,
@@ -113,7 +115,9 @@ const make = Effect.gen(function* () {
   })
 })
 
-export const WordServiceLive = Layer.effect(WordService, make).pipe(
-  Layer.provide(WordRepositoryLive),
-  Layer.provide(DatabaseLive)
+export const WordServiceLive = serverOnly(() =>
+  Layer.effect(WordService, make).pipe(
+    Layer.provide(WordRepositoryLive),
+    Layer.provide(DatabaseLive())
+  )
 )

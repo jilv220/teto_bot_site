@@ -159,9 +159,9 @@ export const recordUserMessage = createServerFn({ method: 'POST' })
   .handler(async ({ data: params }) => {
     return await Effect.runPromise(
       recordUserMessageEffect(params).pipe(
-        Effect.provide(UserServiceLive),
-        Effect.provide(UserGuildServiceLive),
-        Effect.provide(GuildServiceLive)
+        Effect.provide(UserServiceLive()),
+        Effect.provide(UserGuildServiceLive()),
+        Effect.provide(GuildServiceLive())
       )
     )
   })
@@ -173,9 +173,9 @@ export const ensureUserGuildExists = createServerFn({ method: 'POST' })
   .handler(async ({ data: params }) => {
     return await Effect.runPromise(
       ensureUserGuildExistsEffect(params).pipe(
-        Effect.provide(UserServiceLive),
-        Effect.provide(UserGuildServiceLive),
-        Effect.provide(GuildServiceLive)
+        Effect.provide(UserServiceLive()),
+        Effect.provide(UserGuildServiceLive()),
+        Effect.provide(GuildServiceLive())
       )
     )
   })

@@ -36,7 +36,7 @@ export const ServerRoute = createServerFileRoute('/api/user-guilds')
 
           const res = await Effect.runPromise(
             getUserGuildEffect(parsedParams.userId, parsedParams.guildId).pipe(
-              Effect.provide(UserGuildServiceLive)
+              Effect.provide(UserGuildServiceLive())
             )
           )
 
@@ -53,7 +53,7 @@ export const ServerRoute = createServerFileRoute('/api/user-guilds')
 
       // Otherwise, get all user-guild relationships
       const res = await Effect.runPromise(
-        getUserGuildsEffect.pipe(Effect.provide(UserGuildServiceLive))
+        getUserGuildsEffect.pipe(Effect.provide(UserGuildServiceLive()))
       )
 
       if ('error' in res && res.error) {
@@ -71,7 +71,7 @@ export const ServerRoute = createServerFileRoute('/api/user-guilds')
 
         const res = await Effect.runPromise(
           createUserGuildEffect(userGuildData).pipe(
-            Effect.provide(UserGuildServiceLive)
+            Effect.provide(UserGuildServiceLive())
           )
         )
 
@@ -103,7 +103,7 @@ export const ServerRoute = createServerFileRoute('/api/user-guilds')
 
         const res = await Effect.runPromise(
           updateUserGuildEffect(params).pipe(
-            Effect.provide(UserGuildServiceLive)
+            Effect.provide(UserGuildServiceLive())
           )
         )
 
