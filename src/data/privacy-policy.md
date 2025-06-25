@@ -74,12 +74,9 @@ We collect and store:
 
 We use the following third-party services that may process your data:
 
-- **OpenRouter/LangChain**: For AI language model processing
+- **OpenRouter**: For AI language model processing
 - **Top.gg**: For bot voting and statistics
 - **Discord API**: For bot functionality and user interaction
-- **LangSmith**: For AI model monitoring and improvement
-
-> **Important**: LangSmith retains user messages for at least 14 days for tracing and monitoring purposes, even on free tier plans.
 
 ### 4.3 Data Transmission
 
