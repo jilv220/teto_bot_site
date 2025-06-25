@@ -1,6 +1,6 @@
-# Privacy Policy for Kasane Teto Bot
+# Privacy Policy
 
-**Last Updated:** December 17, 2024
+**Last Updated:** June 24, 2025
 
 ## 1. Introduction
 
@@ -137,9 +137,8 @@ We may update this Privacy Policy from time to time. We will notify users of any
 
 If you have any questions about this Privacy Policy or our data practices, please contact us:
 
-- **Support Server**: [Your Discord Support Server Link]
-- **Email**: [Your Contact Email]
-- **Developer**: [Your Discord Username/Tag]
+- **Support Server**: <https://discord.gg/YS76cVJk>
+- **Developer**: nomine_digna
 
 ## 12. Compliance
 
@@ -160,4 +159,4 @@ We process your data based on:
 
 ---
 
-By using Kasane Teto Bot, you acknowledge that you have read and understood this Privacy Policy and agree to our data collection and usage practices as described herein.
+**By using Kasane Teto Bot, you acknowledge that you have read and understood this Privacy Policy and agree to our data collection and usage practices as described herein.**

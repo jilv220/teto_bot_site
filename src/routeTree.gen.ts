@@ -12,11 +12,12 @@ import { createServerRootRoute } from '@tanstack/react-start/server'
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AdminRouteImport } from './routes/admin'
-import { Route as MarketingRouteImport } from './routes/_marketing'
+import { Route as PublicRouteImport } from './routes/_public'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
+import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as AdminLyricsRouteImport } from './routes/admin/lyrics'
-import { Route as MarketingPrivacyRouteImport } from './routes/_marketing/privacy'
+import { Route as PublicTermsRouteImport } from './routes/_public/terms'
+import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
 import { ServerRoute as AuthLogoutServerRouteImport } from './routes/auth/logout'
 import { ServerRoute as AuthCallbackServerRouteImport } from './routes/auth/callback'
 import { ServerRoute as ApiWordOfTheDayServerRouteImport } from './routes/api/word-of-the-day'
@@ -43,8 +44,8 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MarketingRoute = MarketingRouteImport.update({
-  id: '/_marketing',
+const PublicRoute = PublicRouteImport.update({
+  id: '/_public',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -52,20 +53,25 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
-const MarketingIndexRoute = MarketingIndexRouteImport.update({
+const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => MarketingRoute,
+  getParentRoute: () => PublicRoute,
 } as any)
 const AdminLyricsRoute = AdminLyricsRouteImport.update({
   id: '/lyrics',
   path: '/lyrics',
   getParentRoute: () => AdminRoute,
 } as any)
-const MarketingPrivacyRoute = MarketingPrivacyRouteImport.update({
+const PublicTermsRoute = PublicTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicPrivacyRoute = PublicPrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
-  getParentRoute: () => MarketingRoute,
+  getParentRoute: () => PublicRoute,
 } as any)
 const AuthLogoutServerRoute = AuthLogoutServerRouteImport.update({
   id: '/auth/logout',
@@ -164,43 +170,53 @@ const ApiLyricsArtistTitleServerRoute =
 
 export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
-  '/privacy': typeof MarketingPrivacyRoute
+  '/privacy': typeof PublicPrivacyRoute
+  '/terms': typeof PublicTermsRoute
   '/admin/lyrics': typeof AdminLyricsRoute
-  '/': typeof MarketingIndexRoute
+  '/': typeof PublicIndexRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
-  '/privacy': typeof MarketingPrivacyRoute
+  '/privacy': typeof PublicPrivacyRoute
+  '/terms': typeof PublicTermsRoute
   '/admin/lyrics': typeof AdminLyricsRoute
-  '/': typeof MarketingIndexRoute
+  '/': typeof PublicIndexRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_marketing': typeof MarketingRouteWithChildren
+  '/_public': typeof PublicRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
-  '/_marketing/privacy': typeof MarketingPrivacyRoute
+  '/_public/privacy': typeof PublicPrivacyRoute
+  '/_public/terms': typeof PublicTermsRoute
   '/admin/lyrics': typeof AdminLyricsRoute
-  '/_marketing/': typeof MarketingIndexRoute
+  '/_public/': typeof PublicIndexRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/admin' | '/privacy' | '/admin/lyrics' | '/' | '/admin/'
+  fullPaths:
+    | '/admin'
+    | '/privacy'
+    | '/terms'
+    | '/admin/lyrics'
+    | '/'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/privacy' | '/admin/lyrics' | '/' | '/admin'
+  to: '/privacy' | '/terms' | '/admin/lyrics' | '/' | '/admin'
   id:
     | '__root__'
-    | '/_marketing'
+    | '/_public'
     | '/admin'
-    | '/_marketing/privacy'
+    | '/_public/privacy'
+    | '/_public/terms'
     | '/admin/lyrics'
-    | '/_marketing/'
+    | '/_public/'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  MarketingRoute: typeof MarketingRouteWithChildren
+  PublicRoute: typeof PublicRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
 }
 export interface FileServerRoutesByFullPath {
@@ -352,11 +368,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_marketing': {
-      id: '/_marketing'
+    '/_public': {
+      id: '/_public'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof MarketingRouteImport
+      preLoaderRoute: typeof PublicRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -366,12 +382,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_marketing/': {
-      id: '/_marketing/'
+    '/_public/': {
+      id: '/_public/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof MarketingIndexRouteImport
-      parentRoute: typeof MarketingRoute
+      preLoaderRoute: typeof PublicIndexRouteImport
+      parentRoute: typeof PublicRoute
     }
     '/admin/lyrics': {
       id: '/admin/lyrics'
@@ -380,12 +396,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLyricsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_marketing/privacy': {
-      id: '/_marketing/privacy'
+    '/_public/terms': {
+      id: '/_public/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof PublicTermsRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/privacy': {
+      id: '/_public/privacy'
       path: '/privacy'
       fullPath: '/privacy'
-      preLoaderRoute: typeof MarketingPrivacyRouteImport
-      parentRoute: typeof MarketingRoute
+      preLoaderRoute: typeof PublicPrivacyRouteImport
+      parentRoute: typeof PublicRoute
     }
   }
 }
@@ -520,19 +543,20 @@ declare module '@tanstack/react-start/server' {
   }
 }
 
-interface MarketingRouteChildren {
-  MarketingPrivacyRoute: typeof MarketingPrivacyRoute
-  MarketingIndexRoute: typeof MarketingIndexRoute
+interface PublicRouteChildren {
+  PublicPrivacyRoute: typeof PublicPrivacyRoute
+  PublicTermsRoute: typeof PublicTermsRoute
+  PublicIndexRoute: typeof PublicIndexRoute
 }
 
-const MarketingRouteChildren: MarketingRouteChildren = {
-  MarketingPrivacyRoute: MarketingPrivacyRoute,
-  MarketingIndexRoute: MarketingIndexRoute,
+const PublicRouteChildren: PublicRouteChildren = {
+  PublicPrivacyRoute: PublicPrivacyRoute,
+  PublicTermsRoute: PublicTermsRoute,
+  PublicIndexRoute: PublicIndexRoute,
 }
 
-const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
-  MarketingRouteChildren,
-)
+const PublicRouteWithChildren =
+  PublicRoute._addFileChildren(PublicRouteChildren)
 
 interface AdminRouteChildren {
   AdminLyricsRoute: typeof AdminLyricsRoute
@@ -596,7 +620,7 @@ const ApiUsersServerRouteWithChildren = ApiUsersServerRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
-  MarketingRoute: MarketingRouteWithChildren,
+  PublicRoute: PublicRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
 }
 export const routeTree = rootRouteImport

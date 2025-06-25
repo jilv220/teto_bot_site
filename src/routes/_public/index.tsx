@@ -1,4 +1,3 @@
-import { Footer } from '@/components/Footer'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -7,10 +6,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { siteConfig } from '@/services'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { Bot, Music, Users, Zap } from 'lucide-react'
 
-export const Route = createFileRoute('/_marketing/')({
+export const Route = createFileRoute('/_public/')({
   component: Home,
 })
 
@@ -30,7 +30,7 @@ function Home() {
           </div>
         </div>
         <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
-          Teto Bot
+          {siteConfig.title}
         </h1>
         <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
           Your intelligent Discord companion for music, community management,
@@ -146,8 +146,8 @@ function Home() {
               </Button>
               <Button
                 size="lg"
-                variant="outline"
-                className="px-8 py-3 text-white border-white hover:bg-white hover:text-blue-600"
+                variant="secondary"
+                className="px-8 py-3"
                 asChild
               >
                 <a
