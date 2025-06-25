@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last Updated:** June 24, 2025
+**Last Updated:** June 25, 2025
 
 ## 1. Introduction
 
@@ -68,7 +68,8 @@ We collect and store:
 
 - Your data is stored securely in our database systems
 - We implement appropriate technical and organizational measures to protect your data
-- Data is retained as long as necessary to provide our services
+- Senstive Data such as message content and link to attachment only lives in memory and are never stored
+- Non senstive Data is retained as long as necessary to provide our services
 
 ### 4.2 Third-Party Services
 
@@ -108,11 +109,9 @@ We do not sell, trade, or otherwise transfer your personal information to third 
 
 ## 7. Data Retention
 
-- **User Data**: Retained while you actively use the Bot and for a reasonable period afterward
-- **Interaction History**: May be retained for AI model improvement and service optimization
+- **Non Senstive Data**: Retained while you actively use the Bot and for a reasonable period afterward
 - **Logs**: Technical logs are retained for troubleshooting and security purposes
 - **Inactive Accounts**: Data for inactive users may be automatically purged after extended periods
-- **Third-Party Retention**: LangSmith retains user message content for a minimum of 14 days for AI model tracing and monitoring, regardless of subscription tier
 
 ## 8. Children's Privacy
 
