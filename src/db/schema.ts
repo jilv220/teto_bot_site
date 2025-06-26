@@ -102,6 +102,7 @@ export const userGuilds = pgTable(
     lastFeed: timestamp('last_feed', { mode: 'string' }),
     // You can use { mode: "bigint" } if numbers are exceeding js number limitations
     dailyMessageCount: bigint('daily_message_count', { mode: 'bigint' })
+      // Avoid use BigInt, drizzle errors out if you do that
       .default(0 as unknown as bigint)
       .notNull(),
   },

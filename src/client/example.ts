@@ -377,21 +377,18 @@ async function handleDiscordMessageOptimized(
       return
     }
 
-    const { user, userGuild, userCreated, userGuildCreated } = result.data
+    const { user, userGuild } = result.data
 
     // Log what happened
-    if (userCreated) {
-      console.log(`Created new user: ${user.userId}`)
-    }
-    if (userGuildCreated) {
-      console.log(
-        `Created new user-guild relationship: ${user.userId} in ${userGuild.guildId}`
-      )
-    }
+    console.log(`Processed message for user: ${user.userId}`)
 
-    console.log(
-      `Updated user stats: intimacy=${userGuild.intimacy}, dailyMessages=${userGuild.dailyMessageCount}`
-    )
+    if (userGuild) {
+      console.log(
+        `Updated user stats: intimacy=${userGuild.intimacy}, dailyMessages=${userGuild.dailyMessageCount}`
+      )
+    } else {
+      console.log('Processed DM message (no guild stats updated)')
+    }
 
     // Optional: Get token count for the message (separate call since it's a different concern)
     const tokenResponse = await discordBotApi.tokens.getTokenCount(message)
@@ -431,12 +428,10 @@ async function handleUserJoinGuild(userId: string, guildId: string) {
       return
     }
 
-    const { user, userGuild, userCreated, userGuildCreated } = result.data
+    const { user, userGuild } = result.data
 
     console.log(`User ${user.userId} joined guild ${userGuild.guildId}`)
-    console.log(
-      `New user: ${userCreated}, New relationship: ${userGuildCreated}`
-    )
+    console.log('User-guild relationship ensured successfully')
   } catch (error) {
     console.error(
       'Error handling user join:',

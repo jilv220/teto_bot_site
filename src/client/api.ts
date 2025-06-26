@@ -561,8 +561,7 @@ export interface EnsureUserGuildExistsRequest {
 
 export interface RecordUserMessageRequest {
   userId: string
-  guildId: string
-  messageLength?: number
+  guildId?: string
   intimacyIncrement?: number
   role?: 'user' | 'admin'
 }
@@ -571,17 +570,13 @@ export interface EnsureUserGuildExistsResponse {
   data: {
     user: User
     userGuild: UserGuild
-    userCreated: boolean
-    userGuildCreated: boolean
   }
 }
 
 export interface RecordUserMessageResponse {
   data: {
     user: User
-    userGuild: UserGuild
-    userCreated: boolean
-    userGuildCreated: boolean
+    userGuild?: UserGuild
   }
 }
 

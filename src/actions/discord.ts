@@ -16,8 +16,9 @@ import { serializeBigInt } from '../utils/bigint'
 
 // Schemas
 export const RecordUserMessageSchema = z.object({
-  userId: z.string(),
-  guildId: z.string(),
+  userId: z.coerce.bigint(),
+  // if guild id is missing, it means the message is a DM
+  guildId: z.coerce.bigint().optional(),
   intimacyIncrement: z.number().default(1),
 })
 
@@ -27,7 +28,6 @@ export const EnsureUserGuildExistsSchema = z.object({
   role: z.enum(['user', 'admin']).default('user'),
 })
 
-// Effect implementations
 export const recordUserMessageEffect = (
   params: z.infer<typeof RecordUserMessageSchema>
 ) =>
@@ -37,20 +37,13 @@ export const recordUserMessageEffect = (
     const guildService = yield* GuildService
     const config = yield* appConfig
 
-    const userId = BigInt(params.userId)
-    const guildId = BigInt(params.guildId)
+    const { userId, guildId, intimacyIncrement } = params
 
     // Ensure user exists (getOrCreateUser handles creation automatically)
-    const user = yield* userService.getOrCreateUser(userId)
+    yield* userService.getOrCreateUser(userId)
 
-    // Ensure guild exists
-    const guild = yield* guildService.getOrCreateGuild(guildId)
-
-    // Ensure user-guild relationship exists (getOrCreateUserGuild handles creation)
-    const userGuild = yield* userGuildService.getOrCreateUserGuild(
-      userId,
-      guildId
-    )
+    // Ensure guild exists if guildId is provided
+    if (guildId) yield* guildService.getOrCreateGuild(guildId)
 
     // ATOMICALLY: Deduct credits first, then update metrics
     // This ensures we don't update metrics if the user doesn't have enough credits
@@ -59,27 +52,37 @@ export const recordUserMessageEffect = (
       config.messageCreditCost
     )
 
-    // Record the message activity (only if credit deduction succeeded)
-    const updatedUserGuild = yield* userGuildService.updateUserGuild(
-      userId,
-      guildId,
-      {
-        dailyMessageCount: userGuild.dailyMessageCount + BigInt(1),
-        intimacy: userGuild.intimacy + params.intimacyIncrement,
-        lastMessageAt: new Date().toISOString(),
+    // Handle guild-specific updates if guildId exists
+    if (guildId) {
+      // Ensure user-guild relationship exists
+      const userGuild = yield* userGuildService.getOrCreateUserGuild(
+        userId,
+        guildId
+      )
+
+      // Record the message activity (only if credit deduction succeeded)
+      const updatedUserGuild = yield* userGuildService.updateUserGuild(
+        userId,
+        guildId,
+        {
+          dailyMessageCount: userGuild.dailyMessageCount + BigInt(1),
+          intimacy: userGuild.intimacy + intimacyIncrement,
+          lastMessageAt: new Date().toISOString(),
+        }
+      )
+
+      return {
+        data: {
+          user: serializeBigInt(updatedUser),
+          userGuild: serializeBigInt(updatedUserGuild),
+        },
       }
-    )
+    }
 
-    const serializedUser: SerializedUser = serializeBigInt(updatedUser)
-    const serializedUserGuild: SerializedUserGuild =
-      serializeBigInt(updatedUserGuild)
-
+    // DM case - only return user data
     return {
       data: {
-        user: serializedUser,
-        userGuild: serializedUserGuild,
-        userCreated: false, // getOrCreateUser doesn't indicate if created
-        userGuildCreated: false, // getOrCreateUserGuild doesn't indicate if created
+        user: serializeBigInt(updatedUser),
       },
     }
   }).pipe(
@@ -135,8 +138,6 @@ export const ensureUserGuildExistsEffect = (
       data: {
         user: serializedUser,
         userGuild: serializedUserGuild,
-        userCreated: false, // getOrCreateUser doesn't indicate if created
-        userGuildCreated: false, // getOrCreateUserGuild doesn't indicate if created
       },
     }
   }).pipe(

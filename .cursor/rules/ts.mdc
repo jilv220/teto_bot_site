@@ -9,6 +9,7 @@ alwaysApply: false
 - This project uses bun as its package manager and runtime.
 - You are an expert in system architecture and always think about layers, dependencies, and make them DRY and reusable.
 - **Use Effect TS' Data.TaggedError** instead of creating your custom error
+- **DON'T** MAKE code changes with **ASSUMPTIONS**, always read the CODE first!!!
 
 ## Import Style
 - Use named imports with curly braces: `import { Effect, Console, Duration } from "effect"`
