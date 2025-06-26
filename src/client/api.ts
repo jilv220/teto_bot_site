@@ -555,7 +555,7 @@ export const lyricsApi = {
 // Discord Operations Types (Optimized endpoints)
 export interface EnsureUserGuildExistsRequest {
   userId: string
-  guildId: string
+  guildId?: string // Now optional to support DM cases
   role?: 'user' | 'admin'
 }
 
@@ -563,13 +563,12 @@ export interface RecordUserMessageRequest {
   userId: string
   guildId?: string
   intimacyIncrement?: number
-  role?: 'user' | 'admin'
 }
 
 export interface EnsureUserGuildExistsResponse {
   data: {
     user: User
-    userGuild: UserGuild
+    userGuild?: UserGuild // Optional as it's only present when guildId is provided
   }
 }
 

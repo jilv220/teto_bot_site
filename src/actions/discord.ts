@@ -23,8 +23,9 @@ export const RecordUserMessageSchema = z.object({
 })
 
 export const EnsureUserGuildExistsSchema = z.object({
-  userId: z.string(),
-  guildId: z.string(),
+  userId: z.coerce.bigint(),
+  // if guild id is missing, it means the message is a DM
+  guildId: z.coerce.bigint().optional(),
   role: z.enum(['user', 'admin']).default('user'),
 })
 
@@ -116,28 +117,36 @@ export const ensureUserGuildExistsEffect = (
     const userGuildService = yield* UserGuildService
     const guildService = yield* GuildService
 
-    const userId = BigInt(params.userId)
-    const guildId = BigInt(params.guildId)
+    const { userId, guildId } = params
 
     // Ensure user exists (getOrCreateUser handles creation automatically)
     const user = yield* userService.getOrCreateUser(userId)
+    const serializedUser: SerializedUser = serializeBigInt(user)
 
     // Ensure guild exists
-    const guild = yield* guildService.getOrCreateGuild(guildId)
+    if (guildId) {
+      const guild = yield* guildService.getOrCreateGuild(guildId)
 
-    // Ensure user-guild relationship exists (getOrCreateUserGuild handles creation)
-    const userGuild = yield* userGuildService.getOrCreateUserGuild(
-      userId,
-      guildId
-    )
+      // Ensure user-guild relationship exists (getOrCreateUserGuild handles creation)
+      const userGuild = yield* userGuildService.getOrCreateUserGuild(
+        userId,
+        guildId
+      )
 
-    const serializedUser: SerializedUser = serializeBigInt(user)
-    const serializedUserGuild: SerializedUserGuild = serializeBigInt(userGuild)
+      const serializedUserGuild: SerializedUserGuild =
+        serializeBigInt(userGuild)
+
+      return {
+        data: {
+          user: serializedUser,
+          userGuild: serializedUserGuild,
+        },
+      }
+    }
 
     return {
       data: {
         user: serializedUser,
-        userGuild: serializedUserGuild,
       },
     }
   }).pipe(

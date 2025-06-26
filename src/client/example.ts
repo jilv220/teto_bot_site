@@ -367,9 +367,7 @@ async function handleDiscordMessageOptimized(
     const result = await discordBotApi.discord.recordUserMessage({
       userId,
       guildId,
-      messageLength: message.length,
       intimacyIncrement: 1,
-      role: 'user',
     })
 
     if (!isSuccessResponse<RecordUserMessageResponse>(result)) {
@@ -430,8 +428,13 @@ async function handleUserJoinGuild(userId: string, guildId: string) {
 
     const { user, userGuild } = result.data
 
-    console.log(`User ${user.userId} joined guild ${userGuild.guildId}`)
-    console.log('User-guild relationship ensured successfully')
+    if (userGuild) {
+      console.log(`User ${user.userId} joined guild ${userGuild.guildId}`)
+      console.log('User-guild relationship ensured successfully')
+    } else {
+      console.log(`User ${user.userId} ensured (DM context - no guild)`)
+      console.log('User ensured successfully')
+    }
   } catch (error) {
     console.error(
       'Error handling user join:',
