@@ -35,6 +35,11 @@ export class UserService extends Context.Tag('UserService')<
       bonusAmount: number
     ) => Effect.Effect<User, UserServiceError | UserRepositoryError>
 
+    awardPurchaseCredits: (
+      userId: bigint,
+      bonusAmount: number
+    ) => Effect.Effect<User, UserServiceError | UserRepositoryError>
+
     /**
      * Business logic: Deduct message credits from user if they have enough
      */
@@ -93,6 +98,22 @@ const make = Effect.gen(function* () {
         const updatedUser = yield* userRepo.update(userId, {
           messageCredits: user.messageCredits + BigInt(bonusAmount),
           lastVotedAt: new Date().toISOString(),
+        })
+
+        return updatedUser
+      }),
+    awardPurchaseCredits: (userId: bigint, creditAmount: number) =>
+      Effect.gen(function* () {
+        const user = yield* userRepo.findById(userId)
+
+        if (!user) {
+          return yield* Effect.fail(
+            new UserServiceError({ message: `User ${userId} not found` })
+          )
+        }
+
+        const updatedUser = yield* userRepo.update(userId, {
+          messageCredits: user.messageCredits + BigInt(creditAmount),
         })
 
         return updatedUser

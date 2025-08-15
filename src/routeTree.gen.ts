@@ -31,6 +31,7 @@ import { ServerRoute as ApiLeaderboardServerRouteImport } from './routes/api/lea
 import { ServerRoute as ApiGuildsServerRouteImport } from './routes/api/guilds'
 import { ServerRoute as ApiEnsureUserGuildExistsServerRouteImport } from './routes/api/ensure-user-guild-exists'
 import { ServerRoute as ApiChannelsServerRouteImport } from './routes/api/channels'
+import { ServerRoute as ApiWebhooksPolarServerRouteImport } from './routes/api/webhooks/polar'
 import { ServerRoute as ApiUsersUserIdServerRouteImport } from './routes/api/users/$userId'
 import { ServerRoute as ApiLyricsTitleServerRouteImport } from './routes/api/lyrics/$title'
 import { ServerRoute as ApiGuildsGuildIdServerRouteImport } from './routes/api/guilds/$guildId'
@@ -140,6 +141,11 @@ const ApiChannelsServerRoute = ApiChannelsServerRouteImport.update({
   path: '/api/channels',
   getParentRoute: () => rootServerRouteImport,
 } as any)
+const ApiWebhooksPolarServerRoute = ApiWebhooksPolarServerRouteImport.update({
+  id: '/api/webhooks/polar',
+  path: '/api/webhooks/polar',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
 const ApiUsersUserIdServerRoute = ApiUsersUserIdServerRouteImport.update({
   id: '/$userId',
   path: '/$userId',
@@ -237,6 +243,7 @@ export interface FileServerRoutesByFullPath {
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
   '/api/lyrics/$title': typeof ApiLyricsTitleServerRoute
   '/api/users/$userId': typeof ApiUsersUserIdServerRoute
+  '/api/webhooks/polar': typeof ApiWebhooksPolarServerRoute
   '/api/lyrics/$artist/$title': typeof ApiLyricsArtistTitleServerRoute
 }
 export interface FileServerRoutesByTo {
@@ -257,6 +264,7 @@ export interface FileServerRoutesByTo {
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
   '/api/lyrics/$title': typeof ApiLyricsTitleServerRoute
   '/api/users/$userId': typeof ApiUsersUserIdServerRoute
+  '/api/webhooks/polar': typeof ApiWebhooksPolarServerRoute
   '/api/lyrics/$artist/$title': typeof ApiLyricsArtistTitleServerRoute
 }
 export interface FileServerRoutesById {
@@ -278,6 +286,7 @@ export interface FileServerRoutesById {
   '/api/guilds/$guildId': typeof ApiGuildsGuildIdServerRoute
   '/api/lyrics/$title': typeof ApiLyricsTitleServerRoute
   '/api/users/$userId': typeof ApiUsersUserIdServerRoute
+  '/api/webhooks/polar': typeof ApiWebhooksPolarServerRoute
   '/api/lyrics/$artist/$title': typeof ApiLyricsArtistTitleServerRoute
 }
 export interface FileServerRouteTypes {
@@ -300,6 +309,7 @@ export interface FileServerRouteTypes {
     | '/api/guilds/$guildId'
     | '/api/lyrics/$title'
     | '/api/users/$userId'
+    | '/api/webhooks/polar'
     | '/api/lyrics/$artist/$title'
   fileServerRoutesByTo: FileServerRoutesByTo
   to:
@@ -320,6 +330,7 @@ export interface FileServerRouteTypes {
     | '/api/guilds/$guildId'
     | '/api/lyrics/$title'
     | '/api/users/$userId'
+    | '/api/webhooks/polar'
     | '/api/lyrics/$artist/$title'
   id:
     | '__root__'
@@ -340,6 +351,7 @@ export interface FileServerRouteTypes {
     | '/api/guilds/$guildId'
     | '/api/lyrics/$title'
     | '/api/users/$userId'
+    | '/api/webhooks/polar'
     | '/api/lyrics/$artist/$title'
   fileServerRoutesById: FileServerRoutesById
 }
@@ -357,6 +369,7 @@ export interface RootServerRouteChildren {
   ApiWordOfTheDayServerRoute: typeof ApiWordOfTheDayServerRoute
   AuthCallbackServerRoute: typeof AuthCallbackServerRoute
   AuthLogoutServerRoute: typeof AuthLogoutServerRoute
+  ApiWebhooksPolarServerRoute: typeof ApiWebhooksPolarServerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -505,6 +518,13 @@ declare module '@tanstack/react-start/server' {
       preLoaderRoute: typeof ApiChannelsServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
+    '/api/webhooks/polar': {
+      id: '/api/webhooks/polar'
+      path: '/api/webhooks/polar'
+      fullPath: '/api/webhooks/polar'
+      preLoaderRoute: typeof ApiWebhooksPolarServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
     '/api/users/$userId': {
       id: '/api/users/$userId'
       path: '/$userId'
@@ -640,6 +660,7 @@ const rootServerRouteChildren: RootServerRouteChildren = {
   ApiWordOfTheDayServerRoute: ApiWordOfTheDayServerRoute,
   AuthCallbackServerRoute: AuthCallbackServerRoute,
   AuthLogoutServerRoute: AuthLogoutServerRoute,
+  ApiWebhooksPolarServerRoute: ApiWebhooksPolarServerRoute,
 }
 export const serverRouteTree = rootServerRouteImport
   ._addFileChildren(rootServerRouteChildren)
